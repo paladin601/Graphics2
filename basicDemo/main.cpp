@@ -312,7 +312,7 @@ void buildGeometry(Mesh * m)
 		glBindVertexArray(VAO);
 		// Sets the buffer geometry data
 		glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-		glBufferData(GL_ARRAY_BUFFER, geo->sizeVertex * sizeof(glm::vec3), &vertex[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, geo->getSizeVertex() * sizeof(glm::vec3), &vertex[0], GL_STATIC_DRAW);
 		// Sets the vertex attributes
 		// Position
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
@@ -364,16 +364,16 @@ void updateDataMesh() {
 	meshes[meshPicked]->setIORout(userInterface->getIORout());
 
 	geo = meshes[meshPicked]->getGeometry(geometryPicked);
-	geo->translate = userInterface->getGeometryTranslate();
-	geo->rotate = userInterface->getGeometryRotate();
-	geo->scale = userInterface->getGeometryScale();
+	geo->setTranslate( userInterface->getGeometryTranslate());
+	geo->setRotate( userInterface->getGeometryRotate());
+	geo->setScale(userInterface->getGeometryScale());
 	geo->material.ambient = userInterface->getColorAmbientGeometry();
 	geo->material.specular = userInterface->getColorSpecularGeometry();
 	geo->material.diffuse = userInterface->getColorDiffuseGeometry();
 	geo->material.shininess = userInterface->getShininessGeometry();
 	geo->material.roughness = userInterface->getRoughnessGeometry();
-	geo->kd = userInterface->getkd();
-	geo->ks = userInterface->getks();
+	geo->setKD(userInterface->getkd());
+	geo->setKS(userInterface->getks());
 		
 }
 
@@ -381,17 +381,17 @@ void updateDataMesh() {
 
 void updateGeometrydata() {
 	geo = meshes[meshPicked]->getGeometry(geometryPicked);
-	userInterface->setGeometryName(geo->name);
-	userInterface->setGeometryTranslate(geo->translate);
-	userInterface->setGeometryScale(geo->scale);
-	userInterface->setGeometryRotate(geo->rotate);
+	userInterface->setGeometryName(geo->getName());
+	userInterface->setGeometryTranslate(geo->getTranslate());
+	userInterface->setGeometryScale(geo->getScale());
+	userInterface->setGeometryRotate(geo->getRotate());
 	userInterface->setColorAmbientGeometry(geo->material.ambient);
 	userInterface->setColorDiffuseGeometry(geo->material.diffuse);
 	userInterface->setColorSpecularGeometry(geo->material.specular);
 	userInterface->setShininessGeometry(geo->material.shininess);
 	userInterface->setRoughnessGeometry(geo->material.roughness);
-	userInterface->setkd(geo->kd);
-	userInterface->setks(geo->ks);
+	userInterface->setkd(geo->getKD());
+	userInterface->setks(geo->getKS());
 }
 
 
@@ -665,7 +665,7 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setVec3("objMaterial.AmbientColor", geo->material.ambient);
 	shaders[shaderSelect]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
 	shaders[shaderSelect]->setFloat("objMaterial.roughness", geo->material.roughness);
-	shaders[shaderSelect]->setInt("objMaterial.kd", geo->kd);
+	shaders[shaderSelect]->setInt("objMaterial.kd", geo->getKD());
 	shaders[shaderSelect]->setInt("objMaterial.kdTexture", 0);
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
 	shaders[shaderSelect]->setFloat("objMaterial.IORout", mesh->getIORout());
@@ -673,7 +673,7 @@ void activeShader(int shaderSelect) {
 	if (shaderSelect != 2) {//2 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", geo->material.shininess);
-		shaders[shaderSelect]->setInt("objMaterial.ks", geo->ks);
+		shaders[shaderSelect]->setInt("objMaterial.ks", geo->getKS());
 		shaders[shaderSelect]->setInt("objMaterial.ksTexture", 1);
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);
 		shaders[shaderSelect]->setVec3("spotLight.SpecularColor", spotLight->specular);
@@ -730,17 +730,17 @@ void activeTexture(bool cubeMap) {
 	int nn;
 	if (cubeMap) {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(geo->texturekd));
+		glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(geo->getTextureKD()));
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->texturekd));
+		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->textureks));
+		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
 	}
 	else {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->texturekd));
+		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->textureks));
+		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
 	}
 
 }
@@ -769,7 +769,7 @@ void render()
 			{
 			case 0:
 				shaders[1]->use();
-				shaders[1]->setInt("skybox", geo->texturekd);
+				shaders[1]->setInt("skybox", geo->getTextureKD());
 				shaders[1]->setMat4("projectMatrix", Projection);
 				shaders[1]->setMat4("viewMatrix", glm::mat4(glm::mat3(View)));
 				break;
@@ -797,7 +797,7 @@ void render()
 					glm::mat4 MVP = Projection * View* Model;
 					shaders[0]->setMat4("mvpMatrix", MVP);
 					glBindVertexArray(geo->getVAO());
-					glDrawArrays(GL_TRIANGLES, 0, geo->sizeVertex);
+					glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
 					glBindVertexArray(0);
 				}
 				break;
@@ -809,7 +809,7 @@ void render()
 				activeTexture(meshes[i]->cubeMap);
 
 				// Renders the triangle gemotry
-				glDrawArrays(GL_TRIANGLES, 0, geo->sizeVertex);
+				glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
 				glBindVertexArray(0);
 				// Swap the buffer
 				glDepthFunc(GL_LESS);
@@ -820,7 +820,7 @@ void render()
 					glBindVertexArray(geo->getVAO());
 					activeTexture(meshes[i]->cubeMap);
 					// Renders the triangle gemotry
-					glDrawArrays(GL_TRIANGLES, 0, geo->sizeVertex);
+					glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
 					glBindVertexArray(0);
 				}
 			}

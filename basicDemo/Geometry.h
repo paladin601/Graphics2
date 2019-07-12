@@ -20,33 +20,66 @@ using std::vector;
 class Geometry
 {
 private:
-	vector< glm::vec3 > faces;
-	vector< glm::vec3 > normals;
+	vector< glm::vec3 > faces, normals, tangent, bitangent;
 	vector< glm::vec2 > uvs;
 	vector<unsigned int> VBO;
 	Transform transform;
 	unsigned int VAO;
-
-public:
-	int kd, ks;
-	int texturekd;
-	int textureks;
+	int textureKD, textureKS, textureNM;
+	int kd, ks,kn;
+	string name;
 	int sizeVertex;
 	int materialType;
-	string name;
-	Material material;
 	glm::vec3 translate, rotate, scale;
-	void setFace(glm::vec3);
-	void setNormal(glm::vec3);
-	void setUV(glm::vec2);
-	void setVBO(unsigned int);
-	vector<unsigned int> getVBO();
+
+public:
+	Material material;
+	
 	void setVAO(unsigned int);
+	void setVBO(unsigned int);
+	void setFace(glm::vec3);
+	void setUV(glm::vec2);
+	void setNormal(glm::vec3);
+	void setTangent(glm::vec3);
+	void setBitangent(glm::vec3);
+	void setTextureNM(int textureid);
+	void setTextureKD(int textureid);
+	void setTextureKS(int textureid);
+	void setKD(int active);
+	void setKS(int active);
+	void setKN(int active);
+
+	void setName(string name);
+	void setSizeVertex(int size);
+	void setMaterialType(int type);
+	void setTranslate(glm::vec3 trans);
+	void setRotate(glm::vec3 rot);
+	void setScale(glm::vec3 sca);
+	
+	
+
+	string getName();
+	int getSizeVertex();
+	int getMaterialType();
+	glm::vec3 getTranslate();
+	glm::vec3 getRotate();
+	glm::vec3 getScale();
+
+	int getKD();
+	int getKS();
+	int getKN();
+	int getTextureNM();
+	int getTextureKD();
+	int getTextureKS();
+	vector<glm::vec3> getTangent();
+	vector<glm::vec3> getBitangent();
 	int getVAO();
+	vector<unsigned int> getVBO();
 	glm::mat4 getGeometryMatrix();
 	vector<glm::vec3> getFaces();
 	vector<glm::vec2> getUVs();
 	vector<glm::vec3> getNormals();
+
 	Geometry();
 	~Geometry();
 };

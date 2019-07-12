@@ -37,7 +37,7 @@ Mesh * ObjLoader::load(string path)
 		file >> token;
 		if (token == "o") {
 			if (a) {
-				geo->sizeVertex = max;
+				geo->setSizeVertex(max);
 				for (i = 0; i < max; i++) {
 					geo->setFace(temp_vertex[vertexIndices[i]]);
 					geo->setNormal(temp_normals[normalIndices[i]]);
@@ -80,74 +80,75 @@ Mesh * ObjLoader::load(string path)
 
 						break;
 					}
-					max = 0;
-					vertexIndices.clear();
-					normalIndices.clear();
-					uvIndices.clear();
-					mesh->setGeometry(geo);
 				}
-				a = true;
-				geo = new Geometry();
-				geo->kd = true;
-				geo->ks = true;
+				max = 0;
+				vertexIndices.clear();
+				normalIndices.clear();
+				uvIndices.clear();
+				mesh->setGeometry(geo);
+			}
+			a = true;
+			geo = new Geometry();
+			geo->setKD(true);
+			geo->setKS(true);
+			file >> v;
+			geo->setName(v);
+		}
+		else {
+			if (token == "v") {
 				file >> v;
-				geo->name = v;
+				file >> v1;
+				file >> v2;
+				vertex = glm::vec3(strtof(v.c_str(), 0), strtof(v1.c_str(), 0), strtof(v2.c_str(), 0));
+				temp_vertex.push_back(vertex);
 			}
 			else {
-				if (token == "v") {
+				if (token == "vt") {
 					file >> v;
 					file >> v1;
-					file >> v2;
-					vertex = glm::vec3(strtof(v.c_str(), 0), strtof(v1.c_str(), 0), strtof(v2.c_str(), 0));
-					temp_vertex.push_back(vertex);
+					uv = glm::vec2(strtof(v.c_str(), 0), strtof(v1.c_str(), 0));
+					temp_uvs.push_back(uv);
 				}
 				else {
-					if (token == "vt") {
+					if (token == "vn") {
 						file >> v;
 						file >> v1;
-						uv = glm::vec2(strtof(v.c_str(), 0), strtof(v1.c_str(), 0));
-						temp_uvs.push_back(uv);
+						file >> v2;
+						normal = glm::vec3(strtof(v.c_str(), 0), strtof(v1.c_str(), 0), strtof(v2.c_str(), 0));
+						temp_normals.push_back(normal);
 					}
 					else {
-						if (token == "vn") {
-							file >> v;
-							file >> v1;
-							file >> v2;
-							normal = glm::vec3(strtof(v.c_str(), 0), strtof(v1.c_str(), 0), strtof(v2.c_str(), 0));
-							temp_normals.push_back(normal);
-						}
-						else {
-							if (token == "f") {
-								for (i = 0; i < 3; i++) {
-									file >> v;
-									n1 = v.substr(0, v.find("/"));
-									vertexIndices.push_back(atoi(n1.c_str()) - 1);
+						if (token == "f") {
+							for (i = 0; i < 3; i++) {
+								file >> v;
+								n1 = v.substr(0, v.find("/"));
+								vertexIndices.push_back(atoi(n1.c_str()) - 1);
 
-									rest = v.substr(v.find("/") + 1, (v.length() - 1));
-									n2 = rest.substr(0, rest.find("/"));
-									uvIndices.push_back(atoi(n2.c_str()) - 1);
+								rest = v.substr(v.find("/") + 1, (v.length() - 1));
+								n2 = rest.substr(0, rest.find("/"));
+								uvIndices.push_back(atoi(n2.c_str()) - 1);
 
-									n3 = rest.substr(rest.find("/") + 1, (rest.length() - 1));
-									normalIndices.push_back(atoi(n3.c_str()) - 1);
-								}
-								max += 3;
+								n3 = rest.substr(rest.find("/") + 1, (rest.length() - 1));
+								normalIndices.push_back(atoi(n3.c_str()) - 1);
 							}
+							max += 3;
 						}
 					}
 				}
 			}
-
 		}
 
-		file.close();
-
-		geo->sizeVertex = max;
-		for (i = 0; i < max; i++) {
-			geo->setFace(temp_vertex[vertexIndices[i]]);
-			geo->setNormal(temp_normals[normalIndices[i]]);
-			geo->setUV(temp_uvs[uvIndices[i]]);
-		}
-		mesh->setGeometry(geo);
-
-		return mesh;
 	}
+
+	file.close();
+
+	geo->setSizeVertex(max);
+	for (i = 0; i < max; i++) {
+		geo->setFace(temp_vertex[vertexIndices[i]]);
+		geo->setNormal(temp_normals[normalIndices[i]]);
+		geo->setUV(temp_uvs[uvIndices[i]]);
+	}
+	mesh->setGeometry(geo);
+
+	return mesh;
+}
