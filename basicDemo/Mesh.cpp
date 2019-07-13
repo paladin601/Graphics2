@@ -2,10 +2,11 @@
 
 Mesh::Mesh()
 {
-	cubeMap = false;
+	reflect = refract = kd = ks = kn = 0;
 	translate = glm::vec3(0.0f);
 	scale = glm::vec3(1.0f);
 	rotate = glm::vec3(0.0f);
+	textureCubeMap = 0;
 	n = 0;
 	materialType = -1;
 	IORout = 1.0f;
@@ -67,6 +68,66 @@ float Mesh::getIORin()
 float Mesh::getIORout()
 {
 	return IORout;
+}
+
+int Mesh::getTextureCubeMap()
+{
+	return textureCubeMap;
+}
+
+int Mesh::getKS()
+{
+	return ks;
+}
+
+int Mesh::getKD()
+{
+	return kd;
+}
+
+int Mesh::getKN()
+{
+	return kn;
+}
+
+int Mesh::getReflect()
+{
+	return reflect;
+}
+
+int Mesh::getRefract()
+{
+	return refract;
+}
+
+void Mesh::setReflect(int active)
+{
+	reflect = active;
+}
+
+void Mesh::setRefract(int active)
+{
+	refract = active;
+}
+
+void Mesh::setKS(int coeficient)
+{
+	ks = coeficient;
+}
+
+void Mesh::setKD(int coeficient)
+{
+	kd = coeficient;
+}
+
+void Mesh::setKN(int coeficient)
+{
+	kn = coeficient;
+}
+
+void Mesh::setTextureCubeMap(int textureid)
+{
+	textureCubeMap = textureid;
 }
 
 void Mesh::setIORin(float in)

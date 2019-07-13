@@ -48,6 +48,10 @@ struct Material{
     vec3 DifusseColor;
     float shininess;
     float roughness;
+    float IORin;
+    float IORout;
+    int kreflect;
+    int krefract;
     int kd;
     sampler2D kdTexture;
 };
@@ -55,7 +59,8 @@ struct Material{
 uniform Material objMaterial;
 
 uniform vec3 viewPos;
-uniform float shininess;
+
+uniform samplerCube skybox;
 
 
 float Attenuation(float constant,float linear,float quadratic, float distance){
@@ -154,5 +159,19 @@ void main() {
         lightContribution+=SpotLightCon(spotLight,normal,normalize(spotLight.Position-dataIn.vertexPos),viewDir,kd);
     }
 
-    fragColor= vec4(lightContribution, 1.0f);
+    vec4 r=vec4(1.0f);
+    if(objMaterial.krefract==1){
+        viewDir=normalize(dataIn.vertexPos-viewPos);
+        float RefractInd= objMaterial.IORout/objMaterial.IORin;
+        vec3 R = refract(viewDir, normal,RefractInd);
+        r=vec4(texture(skybox,R).rgb,1.0f); 
+    }
+    if(objMaterial.kreflect==1){
+        viewDir=normalize(dataIn.vertexPos-viewPos);
+        vec3 R = reflect(viewDir, normal);
+        r=vec4(texture(skybox,R).rgb,1.0f);
+    }
+
+
+    fragColor= vec4(lightContribution, 1.0f)*r;
 }

@@ -58,11 +58,22 @@ CUserInterface::CUserInterface()
 	TwDefine("'Tarea 1' position = '20 20'");
 	TwDefine("'Tarea 1' size = '220 320'");
 
-	TwEnumVal DisplayMaterial[] = { { BLINN_PHON, "Blin Phong" },{ OREN_NAYAR, "Oren Nayar" },{ COOK_TORRANCE, "Cook Torrance" } ,{BLINN_PHON_REFLECT,"Reflect Blin Phong"},{BLINN_PHON_REFRACT,"Refract Blin Phong"} };
-	TwType DeployTwTypeMaterial = TwDefineEnum("DeployTypeMaterial", DisplayMaterial, 5);
+	TwEnumVal DisplayMaterial[] = { { BLINN_PHON, "Blin Phong" },{ OREN_NAYAR, "Oren Nayar" },{ COOK_TORRANCE, "Cook Torrance" } };
+	TwType DeployTwTypeMaterial = TwDefineEnum("DeployTypeMaterial", DisplayMaterial, 3);
 
 
 	TwAddVarRW(mUserInterface, "Material Mesh", DeployTwTypeMaterial, &mMaterial, "label='Selected Material' group='Mesh'");
+
+	TwAddVarRW(mUserInterface, "kd Mesh", TW_TYPE_BOOLCPP, &kdMesh, "label='Diffuse texture' group='Active Mesh'");
+	TwAddVarRW(mUserInterface, "ks Mesh", TW_TYPE_BOOLCPP, &ksMesh, "label='Specular texture' group='Active Mesh'");
+	TwAddVarRW(mUserInterface, "reflect Mesh", TW_TYPE_BOOLCPP, &reflectMesh, "label='Reflect' group='Active Mesh'");
+	TwAddVarRW(mUserInterface, "refract Mesh", TW_TYPE_BOOLCPP, &refractMesh, "label='Refract' group='Active Mesh'");
+
+
+
+
+
+
 	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=9");
 	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Refract Mesh' step=0.01 min=1");
 	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Refract Mesh' step=0.01 min=1");
@@ -154,6 +165,7 @@ CUserInterface::CUserInterface()
 	TwDefine(" 'Tarea 1'/'Scale Mesh'    group='Transform Mesh' opened=false");
 	TwDefine(" 'Tarea 1'/'Rotate Mesh'   group='Transform Mesh' opened=false");
 	TwDefine(" 'Tarea 1'/'Transform Mesh' group=Mesh opened=false");
+	TwDefine(" 'Tarea 1'/'Active Mesh' group=Mesh opened=false");
 	TwDefine(" 'Tarea 1'/'Refract Mesh' group=Mesh opened=false");
 
 
@@ -207,8 +219,7 @@ int CUserInterface::getMeshMaterialPicked()
 	if (mMaterial == BLINN_PHON) return 1;
 	if (mMaterial == OREN_NAYAR) return 2;
 	if (mMaterial == COOK_TORRANCE) return 3;
-	if (mMaterial == BLINN_PHON_REFLECT) return 4;
-	if (mMaterial == BLINN_PHON_REFRACT) return 5;
+
 }
 
 void CUserInterface::setMeshMaterialPicked(int idMaterial)
@@ -224,34 +235,91 @@ void CUserInterface::setMeshMaterialPicked(int idMaterial)
 	case 3:
 		mMaterial = COOK_TORRANCE;
 		break;
-	case 4:
-		mMaterial = BLINN_PHON_REFLECT;
-		break;
-	case 5:
-		mMaterial = BLINN_PHON_REFRACT;
-		break;
 	}
 }
 
-void CUserInterface::setkd(bool a)
+void CUserInterface::setKD(int coeficient)
 {
-	kd = a;
+	if (coeficient == 1) {
+		kd = true;
+	}
+	else {
+		kd = false;
+	}
 }
 
-void CUserInterface::setks(bool a)
+void CUserInterface::setKS(int coeficient)
 {
-	ks = a;
+	if (coeficient == 1) {
+		ks = true;
+	}
+	else {
+		ks = false;
+	}
 }
 
-bool CUserInterface::getkd()
+int CUserInterface::getKD()
 {
-	return kd;
+	if (kd) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
-bool CUserInterface::getks()
+int CUserInterface::getKS()
 {
-	return ks;
+	if (ks) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
+
+int CUserInterface::getReflect()
+{
+	if (reflectMesh) {
+		refractMesh = false;
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+int CUserInterface::getRefract()
+{
+	if (refractMesh) {
+		reflectMesh = false;
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+void CUserInterface::setReflect(int active)
+{
+	if (active==1) {
+		reflectMesh = true;
+	}
+	else {
+		reflectMesh = false;
+	}
+}
+
+void CUserInterface::setRefract(int active)
+{
+	if (active == 1) {
+		refractMesh = true;
+	}
+	else {
+		refractMesh = false;
+	}
+}
+
 
 int CUserInterface::getMeshPicked()
 {
@@ -563,4 +631,42 @@ float CUserInterface::getQuadraticPL2()
 	return quadraticPL2;
 }
 
+void CUserInterface::setMeshKD(int coeficient)
+{
+	if (coeficient == 1) {
+		kdMesh = true;
+	}
+	else {
+		kdMesh = false;
+	}
+}
 
+void CUserInterface::setMeshKS(int coeficient)
+{
+	if (coeficient==1) {
+		ksMesh = true;
+	}
+	else {
+		ksMesh = false;
+	}
+}
+
+int CUserInterface::getMeshKD()
+{
+	if (kdMesh) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+int CUserInterface::getMeshKS()
+{
+	if (ksMesh) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}

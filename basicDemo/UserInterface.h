@@ -10,7 +10,7 @@
 using namespace std;
 using std::string;
 
-typedef enum { BLINN_PHON, OREN_NAYAR ,COOK_TORRANCE, BLINN_PHON_REFLECT, BLINN_PHON_REFRACT } DeployTypeMaterial;
+typedef enum { BLINN_PHON, OREN_NAYAR ,COOK_TORRANCE} DeployTypeMaterial;
 
 class CUserInterface
 {
@@ -31,7 +31,7 @@ private:
 	glm::vec3 DLAmbient;
 	glm::vec3 colorSpecularSL, colorAmbientSL, colorDiffuseSL;
 	float cutOffSL, outerCutOffSL, constantSL, linearSL, quadraticSL;
-	bool activeDL, activeSL, activePL1, activePL2,kd,ks;
+	bool activeDL, activeSL, activePL1, activePL2,kd,ks,kdMesh,ksMesh,reflectMesh,refractMesh;
 
 	glm::vec3 colorSpecularPL1, colorAmbientPL1, colorDiffusePL1;
 	glm::vec3 colorSpecularPL2, colorAmbientPL2, colorDiffusePL2;
@@ -51,10 +51,19 @@ public:
 	void setMeshMaterialPicked(int);
 
 
-	void setkd(bool);
-	void setks(bool);
-	bool getkd();
-	bool getks();
+	void setKD(int coeficient);
+	void setKS(int coeficient);
+	int getKD();
+	int getKS();
+	int getReflect();
+	int getRefract();
+
+	void setReflect(int active);
+	void setRefract(int active);
+	void setMeshKD(int coeficient);
+	void setMeshKS(int coeficient);
+	int getMeshKD();
+	int getMeshKS();
 
 	int getMeshPicked();
 	int getGeometryPicked();

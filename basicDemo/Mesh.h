@@ -22,8 +22,9 @@ private:
 	int materialType;
 	int n;
 	float IORin, IORout;
+	int kd, ks, kn, reflect, refract;
+	int textureCubeMap;
 public:
-	bool cubeMap;
 	Geometry* getGeometry(int);
 	void setGeometry(Geometry*);
 	int getGeometryLength();
@@ -34,7 +35,20 @@ public:
 	glm::vec3 getScale();
 	float getIORin();
 	float getIORout();
+	int getTextureCubeMap();
+	int getKS();
+	int getKD();
+	int getKN();
+	int getReflect();
+	int getRefract();
 
+	void setReflect(int active);
+	void setRefract(int active);
+	void setKS(int coeficient);
+	void setKD(int coeficient);
+	void setKN(int coeficient);
+
+	void setTextureCubeMap(int textureid);
 	void setIORin(float);
 	void setIORout(float);
 	void setTextureGeometry(int geometry, int texturePosKd, int texturePosKs);

@@ -89,8 +89,6 @@ Mesh * ObjLoader::load(string path)
 			}
 			a = true;
 			geo = new Geometry();
-			geo->setKD(true);
-			geo->setKS(true);
 			file >> v;
 			geo->setName(v);
 		}
@@ -149,6 +147,7 @@ Mesh * ObjLoader::load(string path)
 		geo->setUV(temp_uvs[uvIndices[i]]);
 	}
 	mesh->setGeometry(geo);
-
+	mesh->setKD(1);
+	mesh->setKS(1);
 	return mesh;
 }

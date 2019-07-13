@@ -35,7 +35,7 @@ unsigned int VBO[3];
 unsigned int VAO;
 unsigned int textureID;
 
-int n, cont, i, max , materialType;
+int n, cont, i, max, materialType;
 int auxPicked = 0;
 int meshPicked = 3;
 int geometryPicked = 0;
@@ -63,7 +63,7 @@ vector<PointLight *> pointLights;
 Geometry *geo;
 Mesh *mesh;
 vector<unsigned int>VBOaux;
-Camera *camera=new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
+Camera *camera = new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
 glm::mat4 MVP, Projection, View, Model;
 
 
@@ -345,8 +345,8 @@ void buildGeometry(Mesh * m)
 
 
 
-	//textureIDS->setTexture(cubeID);
-	//textureIDS->setTexture(id);
+ //textureIDS->setTexture(cubeID);
+ //textureIDS->setTexture(id);
 
 
 /**
@@ -362,19 +362,23 @@ void updateDataMesh() {
 	meshes[meshPicked]->setScale(userInterface->getMeshScale());
 	meshes[meshPicked]->setIORin(userInterface->getIORin());
 	meshes[meshPicked]->setIORout(userInterface->getIORout());
+	meshes[meshPicked]->setKS(userInterface->getMeshKS());
+	meshes[meshPicked]->setKD(userInterface->getMeshKD());
+	meshes[meshPicked]->setReflect(userInterface->getReflect());
+	meshes[meshPicked]->setRefract(userInterface->getRefract());
 
 	geo = meshes[meshPicked]->getGeometry(geometryPicked);
-	geo->setTranslate( userInterface->getGeometryTranslate());
-	geo->setRotate( userInterface->getGeometryRotate());
+	geo->setTranslate(userInterface->getGeometryTranslate());
+	geo->setRotate(userInterface->getGeometryRotate());
 	geo->setScale(userInterface->getGeometryScale());
 	geo->material.ambient = userInterface->getColorAmbientGeometry();
 	geo->material.specular = userInterface->getColorSpecularGeometry();
 	geo->material.diffuse = userInterface->getColorDiffuseGeometry();
 	geo->material.shininess = userInterface->getShininessGeometry();
 	geo->material.roughness = userInterface->getRoughnessGeometry();
-	geo->setKD(userInterface->getkd());
-	geo->setKS(userInterface->getks());
-		
+	geo->setKD(userInterface->getKD());
+	geo->setKS(userInterface->getKS());
+
 }
 
 
@@ -390,8 +394,8 @@ void updateGeometrydata() {
 	userInterface->setColorSpecularGeometry(geo->material.specular);
 	userInterface->setShininessGeometry(geo->material.shininess);
 	userInterface->setRoughnessGeometry(geo->material.roughness);
-	userInterface->setkd(geo->getKD());
-	userInterface->setks(geo->getKS());
+	userInterface->setKD(geo->getKD());
+	userInterface->setKS(geo->getKS());
 }
 
 
@@ -404,6 +408,12 @@ void updateDataInterface() {
 	userInterface->setMeshRotate(meshes[meshPicked]->getRotate());
 	userInterface->setIORin(meshes[meshPicked]->getIORin());
 	userInterface->setIORout(meshes[meshPicked]->getIORout());
+	
+	userInterface->setMeshKD(meshes[meshPicked]->getKD());
+	userInterface->setMeshKS(meshes[meshPicked]->getKS());
+	userInterface->setReflect(meshes[meshPicked]->getReflect());
+	userInterface->setRefract(meshes[meshPicked]->getRefract());
+
 	updateGeometrydata();
 }
 
@@ -411,7 +421,7 @@ void updateUserInterface()
 {
 	geo = NULL;
 	auxPicked = userInterface->getMeshPicked();
-	if (auxPicked!=meshPicked) {
+	if (auxPicked != meshPicked) {
 		updateDataMesh();
 		geo = NULL;
 
@@ -429,7 +439,7 @@ void updateUserInterface()
 		else {
 			updateDataMesh();
 		}
-		
+
 	}
 	Ambient->direction = userInterface->getDLLightAmbient();
 	Ambient->ambient = userInterface->getColorAmbientDL();
@@ -455,13 +465,13 @@ void updateUserInterface()
 	pointLights[0]->constant = userInterface->getConstantPL1();
 	pointLights[0]->linear = userInterface->getLinearPL1();
 	pointLights[0]->quadratic = userInterface->getQuadraticPL1();
-	
-	
+
+
 	meshes[0]->getGeometry(0)->material.ambient = userInterface->getColorAmbientPL1();
 	meshes[0]->getGeometry(0)->material.diffuse = userInterface->getColorDiffusePL1();
 	meshes[0]->getGeometry(0)->material.specular = userInterface->getColorSpecularPL1();
 	meshes[0]->setTranslate(userInterface->getPositionPL1());
-		
+
 
 
 	pointLights[1]->active = userInterface->getPL2Active();
@@ -472,12 +482,12 @@ void updateUserInterface()
 	pointLights[1]->constant = userInterface->getConstantPL2();
 	pointLights[1]->linear = userInterface->getLinearPL2();
 	pointLights[1]->quadratic = userInterface->getQuadraticPL2();
-	
+
 	meshes[1]->getGeometry(0)->material.ambient = userInterface->getColorAmbientPL2();
 	meshes[1]->getGeometry(0)->material.diffuse = userInterface->getColorDiffusePL2();
 	meshes[1]->getGeometry(0)->material.specular = userInterface->getColorSpecularPL2();
 	meshes[1]->setTranslate(userInterface->getPositionPL2());
-	
+
 }
 
 bool init()
@@ -510,7 +520,7 @@ bool init()
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/refract.frag");
 	shaders.push_back(shader);
-	
+
 
 	vector<string> faces
 	{
@@ -521,6 +531,7 @@ bool init()
 		"assets/textures/skybox/front.jpg",
 		"assets/textures/skybox/back.jpg",
 	};
+
 	textureIDS->setTexture(loaderTexture.loadCubeMap(faces));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/white.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/container2.jpg"));
@@ -583,21 +594,27 @@ bool init()
 	*/
 
 	meshes[2]->setMaterialType(0);
-	meshes[2]->cubeMap = true;
+	meshes[2]->setTextureCubeMap(0);
+
 
 	meshes[3]->setMaterialType(1);
 	meshes[3]->setTextureGeometry(0, 5, 5);
+	meshes[3]->setTextureCubeMap(0);
 
 
 
 	meshes[4]->setMaterialType(1);
 	meshes[4]->setTranslate(glm::vec3(-3.0f, 0.61f, 0.0f));
 	meshes[4]->setTextureGeometry(0, 2, 3);
+	meshes[4]->setTextureCubeMap(0);
+
 
 
 	meshes[5]->setMaterialType(2);
 	meshes[5]->setTranslate(glm::vec3(-4.5f, 0.61f, 0.0f));
 	meshes[5]->setTextureGeometry(0, 2, 3);
+	meshes[5]->setTextureCubeMap(0);
+
 
 	meshes[6]->setTranslate(glm::vec3(-6.0f, 1.35f, 0.0f));
 	meshes[6]->setMaterialType(3);
@@ -607,11 +624,13 @@ bool init()
 	meshes[6]->setTextureGeometry(4, 12, 13);
 	meshes[6]->setTextureGeometry(5, 14, 15);
 	meshes[6]->setTextureGeometry(6, 16, 17);
+	meshes[6]->setTextureCubeMap(0);
 
 	meshes[7]->setTranslate(glm::vec3(3.0f, 0.41f, -3.0f));
 	meshes[7]->setMaterialType(1);
 	meshes[7]->setTextureGeometry(0, 18, 18);
 	meshes[7]->setTextureGeometry(1, 19, 19);
+	meshes[7]->setTextureCubeMap(0);
 
 
 	meshes[8]->setTranslate(glm::vec3(4.0f, 0.55f, -3.0f));
@@ -620,25 +639,41 @@ bool init()
 	meshes[8]->setTextureGeometry(1, 21, 21);
 	meshes[8]->setTextureGeometry(2, 22, 22);
 	meshes[8]->setTextureGeometry(3, 22, 22);
+	meshes[8]->setTextureCubeMap(0);
 
 	meshes[9]->setTranslate(glm::vec3(5.0f, 0.27f, -3.0f));
 	meshes[9]->setMaterialType(3);
 	meshes[9]->setTextureGeometry(0, 24, 24);
 	meshes[9]->setTextureGeometry(1, 23, 23);
 	meshes[9]->setTextureGeometry(2, 24, 24);
+	meshes[9]->setTextureCubeMap(0);
 
 	meshes[10]->setTranslate(glm::vec3(-1.5f, 0.61f, -6.0f));
-	meshes[10]->setMaterialType(4);
-	meshes[10]->cubeMap = true;
+	meshes[10]->setTextureGeometry(0, 2, 3);
+	meshes[10]->setMaterialType(3);
+	meshes[10]->setTextureCubeMap(0);
+
 
 	meshes[11]->setTranslate(glm::vec3(1.5f, 1.35f, -6.0f));
-	meshes[11]->setMaterialType(4);
-	meshes[11]->cubeMap = true;
+	meshes[11]->setMaterialType(3);
+	meshes[11]->setTextureGeometry(0, 6, 7);
+	meshes[11]->setTextureGeometry(2, 8, 9);
+	meshes[11]->setTextureGeometry(3, 10, 11);
+	meshes[11]->setTextureGeometry(4, 12, 13);
+	meshes[11]->setTextureGeometry(5, 14, 15);
+	meshes[11]->setTextureGeometry(6, 16, 17);
+	meshes[11]->setTextureCubeMap(0);
 
 
 	meshes[12]->setTranslate(glm::vec3(0.0f, 1.35f, -6.0f));
-	meshes[12]->setMaterialType(4);
-	meshes[12]->cubeMap = true;
+	meshes[12]->setMaterialType(3);
+	meshes[12]->setTextureGeometry(0, 6, 7);
+	meshes[12]->setTextureGeometry(2, 8, 9);
+	meshes[12]->setTextureGeometry(3, 10, 11);
+	meshes[12]->setTextureGeometry(4, 12, 13);
+	meshes[12]->setTextureGeometry(5, 14, 15);
+	meshes[12]->setTextureGeometry(6, 16, 17);
+	meshes[12]->setTextureCubeMap(0);
 
 
 	max = meshes.size();
@@ -655,26 +690,44 @@ bool init()
 void activeShader(int shaderSelect) {
 	MVP = Projection * View* Model;
 
+	int ks, kd, kn;
+	if (mesh->getKD()) {
+		kd = true;
+	}
+	else {
+		kd = geo->getKD();
+	}
+
+	if (mesh->getKS()) {
+		ks = true;
+	}
+	else {
+		ks = geo->getKS();
+	}
+
 	shaders[shaderSelect]->use();
 	shaders[shaderSelect]->setInt("ambientLight.Active", Ambient->active);
 	shaders[shaderSelect]->setVec3("viewPos", camera->Position);
 	shaders[shaderSelect]->setVec3("ambientLight.AmbientColor", Ambient->ambient);
 	shaders[shaderSelect]->setVec3("ambientLight.DifusseColor", Ambient->diffuse);
 	shaders[shaderSelect]->setVec3("ambientLight.Direction", Ambient->direction);
+	shaders[shaderSelect]->setInt("skybox", 0);
 
 	shaders[shaderSelect]->setVec3("objMaterial.AmbientColor", geo->material.ambient);
 	shaders[shaderSelect]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
 	shaders[shaderSelect]->setFloat("objMaterial.roughness", geo->material.roughness);
-	shaders[shaderSelect]->setInt("objMaterial.kd", geo->getKD());
-	shaders[shaderSelect]->setInt("objMaterial.kdTexture", 0);
+	shaders[shaderSelect]->setInt("objMaterial.kd", kd);
+	shaders[shaderSelect]->setInt("objMaterial.kdTexture", 1);
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
 	shaders[shaderSelect]->setFloat("objMaterial.IORout", mesh->getIORout());
+	shaders[shaderSelect]->setInt("objMaterial.kreflect", mesh->getReflect());
+	shaders[shaderSelect]->setInt("objMaterial.krefract", mesh->getRefract());
 
 	if (shaderSelect != 2) {//2 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", geo->material.shininess);
-		shaders[shaderSelect]->setInt("objMaterial.ks", geo->getKS());
-		shaders[shaderSelect]->setInt("objMaterial.ksTexture", 1);
+		shaders[shaderSelect]->setInt("objMaterial.ks",ks);
+		shaders[shaderSelect]->setInt("objMaterial.ksTexture", 2);
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);
 		shaders[shaderSelect]->setVec3("spotLight.SpecularColor", spotLight->specular);
 	}
@@ -692,15 +745,15 @@ void activeShader(int shaderSelect) {
 
 	int s;
 	for (s = 0; s < pointLights.size(); s++) {
-		shaders[shaderSelect]->setInt("pointLight["+to_string(s)+"].Active", pointLights[s]->active);
-		shaders[shaderSelect]->setVec3("pointLight["+to_string(s)+"].Position", pointLights[s]->position);
-		shaders[shaderSelect]->setVec3("spotpointLight["+to_string(s)+"]Light.AmbientColor", pointLights[s]->ambient);
-		shaders[shaderSelect]->setVec3("pointLight["+to_string(s)+"].DifusseColor", pointLights[s]->diffuse);
-		shaders[shaderSelect]->setFloat("pointLight["+to_string(s)+"].Constant", pointLights[s]->constant);
-		shaders[shaderSelect]->setFloat("pointLight["+to_string(s)+"].Linear", pointLights[s]->linear);
-		shaders[shaderSelect]->setFloat("pointLight["+to_string(s)+"].Quadratic", pointLights[s]->quadratic);
+		shaders[shaderSelect]->setInt("pointLight[" + to_string(s) + "].Active", pointLights[s]->active);
+		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].Position", pointLights[s]->position);
+		shaders[shaderSelect]->setVec3("spotpointLight[" + to_string(s) + "]Light.AmbientColor", pointLights[s]->ambient);
+		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].DifusseColor", pointLights[s]->diffuse);
+		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Constant", pointLights[s]->constant);
+		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Linear", pointLights[s]->linear);
+		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Quadratic", pointLights[s]->quadratic);
 		if (shaderSelect != 2) {
-			shaders[shaderSelect]->setVec3("pointLight["+to_string(s)+"].SpecularColor", pointLights[s]->specular);
+			shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].SpecularColor", pointLights[s]->specular);
 		}
 	}
 
@@ -726,23 +779,13 @@ void activeShader(int shaderSelect) {
   * Render Function
   * */
 
-void activeTexture(bool cubeMap) {
-	int nn;
-	if (cubeMap) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(geo->getTextureKD()));
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
-	}
-	else {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
-	}
-
+void activeTexture() {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(mesh->getTextureCubeMap()));
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
 }
 
 void render()
@@ -769,7 +812,7 @@ void render()
 			{
 			case 0:
 				shaders[1]->use();
-				shaders[1]->setInt("skybox", geo->getTextureKD());
+				shaders[1]->setInt("skybox", 0);
 				shaders[1]->setMat4("projectMatrix", Projection);
 				shaders[1]->setMat4("viewMatrix", glm::mat4(glm::mat3(View)));
 				break;
@@ -806,7 +849,7 @@ void render()
 			if (materialType == 0) {
 				glDepthFunc(GL_LEQUAL);
 				glBindVertexArray(geo->getVAO());
-				activeTexture(meshes[i]->cubeMap);
+				activeTexture();
 
 				// Renders the triangle gemotry
 				glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
@@ -818,7 +861,7 @@ void render()
 				if (materialType != -1) {
 
 					glBindVertexArray(geo->getVAO());
-					activeTexture(meshes[i]->cubeMap);
+					activeTexture();
 					// Renders the triangle gemotry
 					glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
 					glBindVertexArray(0);

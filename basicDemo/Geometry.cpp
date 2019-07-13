@@ -199,7 +199,7 @@ vector<glm::vec3> Geometry::getNormals()
 
 Geometry::Geometry()
 {
-	kd = ks = 0;
+	kd = ks = kn = 0;
 	materialType = 0;
 	translate = glm::vec3(0.0f);
 	scale = glm::vec3(1.0f);

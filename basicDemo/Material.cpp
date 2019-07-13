@@ -35,8 +35,8 @@ void Material::setDefault()
 	ambient = glm::vec3(0.0f);
 	diffuse = glm::vec3(1.0f);
 	specular = glm::vec3(1.0f);
-	shininess = 16.0f;
-	roughness = 0.10f;
+	shininess = 128.0f;
+	roughness = 0.20f;
 }
 
 void Material::setBronze()
