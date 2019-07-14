@@ -140,10 +140,11 @@ void Mesh::setIORout(float out)
 	IORout = out;
 }
 
-void Mesh::setTextureGeometry(int geometry, int texturePosKd ,int texturePosKs)
+void Mesh::setTextureGeometry(int geometry, int texturePosKd ,int texturePosKs, int texturePosKn)
 {
 	geo[geometry]->setTextureKD(texturePosKd);
 	geo[geometry]->setTextureKS(texturePosKs);
+	geo[geometry]->setTextureNM(texturePosKn);
 }
 
 void Mesh::setMaterialType(int a)

@@ -51,7 +51,7 @@ public:
 	void setTextureCubeMap(int textureid);
 	void setIORin(float);
 	void setIORout(float);
-	void setTextureGeometry(int geometry, int texturePosKd, int texturePosKs);
+	void setTextureGeometry(int geometry, int texturePosKd, int texturePosKs,int texturePosKn);
 	void setMaterialType(int);
 	void setTranslate(glm::vec3);
 	void setRotate(glm::vec3);

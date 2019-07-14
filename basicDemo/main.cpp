@@ -568,6 +568,17 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bulbasaur/eye.png"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bulbasaur/body.png"));
 
+	//25
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/arm.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/helmet.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/body.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/leg.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/glass.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
+	//31
+	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
+
+
 
 
 	meshes.push_back(loaderGeometry.load("assets/obj/pointlight.obj"));
@@ -598,81 +609,81 @@ bool init()
 
 
 	meshes[3]->setMaterialType(1);
-	meshes[3]->setTextureGeometry(0, 5, 5);
+	meshes[3]->setTextureGeometry(0, 5, 5,31);
 	meshes[3]->setTextureCubeMap(0);
 
 
 
 	meshes[4]->setMaterialType(1);
 	meshes[4]->setTranslate(glm::vec3(-3.0f, 0.61f, 0.0f));
-	meshes[4]->setTextureGeometry(0, 2, 3);
+	meshes[4]->setTextureGeometry(0, 2, 3,31);
 	meshes[4]->setTextureCubeMap(0);
 
 
 
 	meshes[5]->setMaterialType(2);
 	meshes[5]->setTranslate(glm::vec3(-4.5f, 0.61f, 0.0f));
-	meshes[5]->setTextureGeometry(0, 2, 3);
+	meshes[5]->setTextureGeometry(0, 2, 3,31);
 	meshes[5]->setTextureCubeMap(0);
 
 
 	meshes[6]->setTranslate(glm::vec3(-6.0f, 1.35f, 0.0f));
 	meshes[6]->setMaterialType(3);
-	meshes[6]->setTextureGeometry(0, 6, 7);
-	meshes[6]->setTextureGeometry(2, 8, 9);
-	meshes[6]->setTextureGeometry(3, 10, 11);
-	meshes[6]->setTextureGeometry(4, 12, 13);
-	meshes[6]->setTextureGeometry(5, 14, 15);
-	meshes[6]->setTextureGeometry(6, 16, 17);
+	meshes[6]->setTextureGeometry(0, 6, 7,25);
+	meshes[6]->setTextureGeometry(2, 8, 9,26);
+	meshes[6]->setTextureGeometry(3, 10, 11,27);
+	meshes[6]->setTextureGeometry(4, 12, 13,28);
+	meshes[6]->setTextureGeometry(5, 14, 15,29);
+	meshes[6]->setTextureGeometry(6, 16, 17,30);
 	meshes[6]->setTextureCubeMap(0);
 
 	meshes[7]->setTranslate(glm::vec3(3.0f, 0.41f, -3.0f));
 	meshes[7]->setMaterialType(1);
-	meshes[7]->setTextureGeometry(0, 18, 18);
-	meshes[7]->setTextureGeometry(1, 19, 19);
+	meshes[7]->setTextureGeometry(0, 18, 18,31);
+	meshes[7]->setTextureGeometry(1, 19, 19,31);
 	meshes[7]->setTextureCubeMap(0);
 
 
 	meshes[8]->setTranslate(glm::vec3(4.0f, 0.55f, -3.0f));
 	meshes[8]->setMaterialType(2);
-	meshes[8]->setTextureGeometry(0, 20, 20);
-	meshes[8]->setTextureGeometry(1, 21, 21);
-	meshes[8]->setTextureGeometry(2, 22, 22);
-	meshes[8]->setTextureGeometry(3, 22, 22);
+	meshes[8]->setTextureGeometry(0, 20, 20,31);
+	meshes[8]->setTextureGeometry(1, 21, 21,31);
+	meshes[8]->setTextureGeometry(2, 22, 22,31);
+	meshes[8]->setTextureGeometry(3, 22, 22,31);
 	meshes[8]->setTextureCubeMap(0);
 
 	meshes[9]->setTranslate(glm::vec3(5.0f, 0.27f, -3.0f));
 	meshes[9]->setMaterialType(3);
-	meshes[9]->setTextureGeometry(0, 24, 24);
-	meshes[9]->setTextureGeometry(1, 23, 23);
-	meshes[9]->setTextureGeometry(2, 24, 24);
+	meshes[9]->setTextureGeometry(0, 24, 24,31);
+	meshes[9]->setTextureGeometry(1, 23, 23,31);
+	meshes[9]->setTextureGeometry(2, 24, 24,31);
 	meshes[9]->setTextureCubeMap(0);
 
 	meshes[10]->setTranslate(glm::vec3(-1.5f, 0.61f, -6.0f));
-	meshes[10]->setTextureGeometry(0, 2, 3);
+	meshes[10]->setTextureGeometry(0, 2, 3,31);
 	meshes[10]->setMaterialType(3);
 	meshes[10]->setTextureCubeMap(0);
 
 
 	meshes[11]->setTranslate(glm::vec3(1.5f, 1.35f, -6.0f));
 	meshes[11]->setMaterialType(3);
-	meshes[11]->setTextureGeometry(0, 6, 7);
-	meshes[11]->setTextureGeometry(2, 8, 9);
-	meshes[11]->setTextureGeometry(3, 10, 11);
-	meshes[11]->setTextureGeometry(4, 12, 13);
-	meshes[11]->setTextureGeometry(5, 14, 15);
-	meshes[11]->setTextureGeometry(6, 16, 17);
+	meshes[11]->setTextureGeometry(0, 6, 7,25);
+	meshes[11]->setTextureGeometry(2, 8, 9,26);
+	meshes[11]->setTextureGeometry(3, 10, 11,27);
+	meshes[11]->setTextureGeometry(4, 12, 13,28);
+	meshes[11]->setTextureGeometry(5, 14, 15,29);
+	meshes[11]->setTextureGeometry(6, 16, 17,30);
 	meshes[11]->setTextureCubeMap(0);
 
 
 	meshes[12]->setTranslate(glm::vec3(0.0f, 1.35f, -6.0f));
 	meshes[12]->setMaterialType(3);
-	meshes[12]->setTextureGeometry(0, 6, 7);
-	meshes[12]->setTextureGeometry(2, 8, 9);
-	meshes[12]->setTextureGeometry(3, 10, 11);
-	meshes[12]->setTextureGeometry(4, 12, 13);
-	meshes[12]->setTextureGeometry(5, 14, 15);
-	meshes[12]->setTextureGeometry(6, 16, 17);
+	meshes[12]->setTextureGeometry(0, 6, 7,25);
+	meshes[12]->setTextureGeometry(2, 8, 9,26);
+	meshes[12]->setTextureGeometry(3, 10, 11,27);
+	meshes[12]->setTextureGeometry(4, 12, 13,28);
+	meshes[12]->setTextureGeometry(5, 14, 15,29);
+	meshes[12]->setTextureGeometry(6, 16, 17,30);
 	meshes[12]->setTextureCubeMap(0);
 
 
