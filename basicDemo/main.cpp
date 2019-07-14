@@ -31,7 +31,7 @@ unsigned int windowHeight = 800;
 float aspectRatio = float(windowWidth / windowHeight);
 const char *windowTitle = "CCG Tarea";
 
-unsigned int VBO[3];
+unsigned int VBO[5];
 unsigned int VAO;
 unsigned int textureID;
 
@@ -285,48 +285,65 @@ void initGL()
  * (Builds a simple triangle)
  * */
 
-void buildGeometry(Mesh * m)
+void buildGeometry()
 {
-	cont = m->getGeometryLength();
+	cont = mesh->getGeometryLength();
 	for (n = 0; n < cont; n++) {
-		geo = m->getGeometry(n);
+		geo = mesh->getGeometry(n);
 		vector<glm::vec3> vertex;
 		vector<glm::vec3> normal;
+		vector<glm::vec3> tangent;
+		vector<glm::vec3> bitangent;
 		vector<glm::vec2> uv;
 		vertex = geo->getFaces();
 		uv = geo->getUVs();
 		normal = geo->getNormals();
+		tangent = geo->getTangent();
+		bitangent = geo->getBitangent();
 		// Creates on GPU the vertex array
 		glGenVertexArrays(1, &VAO);
 		// Creates on GPU the vertex buffer object
-		glGenBuffers(3, VBO);
+		glGenBuffers(5, VBO);
 		geo->setVAO(VAO);
 		geo->setVBO(VBO[0]);
 		geo->setVBO(VBO[1]);
 		geo->setVBO(VBO[2]);
+		geo->setVBO(VBO[3]);
+		geo->setVBO(VBO[4]);
 		// Binds the vertex array to set all the its properties
 		glBindVertexArray(VAO);
 		// Sets the buffer geometry data
 		glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-		glBufferData(GL_ARRAY_BUFFER, geo->getSizeVertex() * sizeof(glm::vec3), &vertex[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(glm::vec3), &vertex[0], GL_STATIC_DRAW);
 		// Sets the vertex attributes
 		// Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
 		// buffer de textura 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
 		glBufferData(GL_ARRAY_BUFFER, uv.size() * sizeof(glm::vec2), &uv[0], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
 		glBufferData(GL_ARRAY_BUFFER, normal.size() * sizeof(glm::vec3), &normal[0], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+		glBindBuffer(GL_ARRAY_BUFFER, VBO[3]);
+		glBufferData(GL_ARRAY_BUFFER, tangent.size() * sizeof(glm::vec3), &tangent[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO[4]);
+		glBufferData(GL_ARRAY_BUFFER, bitangent.size() * sizeof(glm::vec3), &bitangent[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
 		glBindVertexArray(0);
 	}
@@ -360,6 +377,7 @@ void updateDataMesh() {
 	meshes[meshPicked]->setIORout(userInterface->getIORout());
 	meshes[meshPicked]->setKS(userInterface->getMeshKS());
 	meshes[meshPicked]->setKD(userInterface->getMeshKD());
+	meshes[meshPicked]->setKN(userInterface->getMeshKN());
 	meshes[meshPicked]->setReflect(userInterface->getReflect());
 	meshes[meshPicked]->setRefract(userInterface->getRefract());
 
@@ -407,6 +425,7 @@ void updateDataInterface() {
 	
 	userInterface->setMeshKD(meshes[meshPicked]->getKD());
 	userInterface->setMeshKS(meshes[meshPicked]->getKS());
+	userInterface->setMeshKN(meshes[meshPicked]->getKN());
 	userInterface->setReflect(meshes[meshPicked]->getReflect());
 	userInterface->setRefract(meshes[meshPicked]->getRefract());
 
@@ -679,8 +698,10 @@ bool init()
 
 
 	max = meshes.size();
-	for (i = 0; i < max; i++)
-		buildGeometry(meshes[i]);
+	for (i = 0; i < max; i++) {
+		mesh = meshes[i];
+		buildGeometry();
+	}
 	// Loads the texture into the GPU
 
 	updateDataInterface();
@@ -690,22 +711,10 @@ bool init()
 
 
 void activeShader(int shaderSelect) {
+	int kn;
+	kn = mesh->getKN();
+
 	MVP = Projection * View* Model;
-
-	int ks, kd, kn;
-	if (mesh->getKD()==1) {
-		kd = 1;
-	}
-	else {
-		kd = 0;
-	}
-
-	if (mesh->getKS()==1) {
-		ks = 1;
-	}
-	else {
-		ks = 0;
-	}
 
 	shaders[shaderSelect]->use();
 	shaders[shaderSelect]->setVec3("PositionPL[0]", pointLights[0]->position);
@@ -714,6 +723,7 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setVec3("DirectionSP", camera->Front);
 	shaders[shaderSelect]->setVec3("DirectionAL", Ambient->direction);
 	shaders[shaderSelect]->setVec3("viewPos", camera->Position);
+	shaders[shaderSelect]->setInt("knActive", kn);
 
 
 
@@ -726,17 +736,20 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
 	shaders[shaderSelect]->setFloat("objMaterial.roughness", geo->material.roughness);
 	
-	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (kd==1 ? 1:4) );
+	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (mesh->getKD()==1) ? 1:4 );
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
 	shaders[shaderSelect]->setFloat("objMaterial.IORout", mesh->getIORout());
 	shaders[shaderSelect]->setInt("objMaterial.kreflect", mesh->getReflect());
 	shaders[shaderSelect]->setInt("objMaterial.krefract", mesh->getRefract());
+	shaders[shaderSelect]->setInt("objMaterial.knTexture", 3);
+	shaders[shaderSelect]->setInt("objMaterial.kn",  kn);
+
 
 	if (shaderSelect != 3) {//3 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", geo->material.shininess);
 
-		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (ks==1)?2:4 );
+		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (mesh->getKS()==1)?2:4 );
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);
 		shaders[shaderSelect]->setVec3("spotLight.SpecularColor", spotLight->specular);
 	}
@@ -793,6 +806,8 @@ void activeTexture() {
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
 
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureNM()));
 
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));//disable specular and diffuse texture
@@ -816,8 +831,8 @@ void render()
 	for (i = 0; i < max; i++) {
 		cont = meshes[i]->getGeometryLength();
 		materialType = meshes[i]->getMaterialType();
+		mesh = meshes[i];
 		for (n = 0; n < cont; n++) {
-			mesh = meshes[i];
 			geo = mesh->getGeometry(n);
 			Model = mesh->getMeshMatrix()* geo->getGeometryMatrix();
 			switch (materialType)
@@ -949,7 +964,9 @@ int main(int argc, char const *argv[])
 			VBO[0] = VBOaux[0];
 			VBO[1] = VBOaux[1];
 			VBO[2] = VBOaux[2];
-			glDeleteBuffers(3, VBO);
+			VBO[3] = VBOaux[3];
+			VBO[4] = VBOaux[4];
+			glDeleteBuffers(5, VBO);
 			// Destroy the shader
 		}
 		meshes[n]->~Mesh();

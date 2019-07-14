@@ -65,13 +65,12 @@ Mesh * ObjLoader::load(string path)
 						deltaUV1 = uv2 - uv1;
 						deltaUV2 = uv3 - uv1;
 
-						float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+						float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x );
 
-						tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
-						tangent = glm::normalize(tangent);
+						tangent = f * (edge1 * deltaUV2.y - edge2 * deltaUV1.y);
 
-						bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
-						bitangent = glm::normalize(bitangent);
+						bitangent = f * (edge2 * deltaUV1.x  - edge1 * deltaUV2.x  );
+
 						geo->setTangent(tangent);
 						geo->setTangent(tangent);
 						geo->setTangent(tangent);
@@ -171,11 +170,10 @@ Mesh * ObjLoader::load(string path)
 
 			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
-			tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
-			tangent = glm::normalize(tangent);
+			tangent = f * (edge1 * deltaUV2.y - edge2 * deltaUV1.y);
 
-			bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
-			bitangent = glm::normalize(bitangent);
+			bitangent = f * (edge2 * deltaUV1.x - edge1 * deltaUV2.x);
+
 			geo->setTangent(tangent);
 			geo->setTangent(tangent);
 			geo->setTangent(tangent);

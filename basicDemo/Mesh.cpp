@@ -2,7 +2,8 @@
 
 Mesh::Mesh()
 {
-	reflect = refract = kd = ks = kn = 0;
+	reflect = refract = kd = ks  = 0;
+	kn = 1;
 	translate = glm::vec3(0.0f);
 	scale = glm::vec3(1.0f);
 	rotate = glm::vec3(0.0f);

@@ -2,8 +2,9 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 texture;
 layout (location = 2) in vec3 normal;
+//normalize in load
 layout (location = 3) in vec3 aTangent;
-layout (location = 4) in vec3 aBitangent;  
+layout (location = 4) in vec3 aBitangent; 
 
 out Data{
     vec3 vertexPos;
@@ -26,22 +27,30 @@ uniform mat4 viewMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 mvpMatrix;
 out vec2 vTexture;
+uniform int knActive;
 
 void main() {
 
-    vec3 T = normalize(mat3(modelMatrix) * aTangent);
-    vec3 B = normalize(mat3(modelMatrix) * aBitangent);
-    vec3 N = normalize(mat3(modelMatrix) * normal);
-    mat3 TBN = mat3(T, B, N);
+    vec3 aNormal=normalize(normal);
+    vec3 atang=normalize(aTangent);
+    vec3 abitang=normalize(aBitangent);
+    vec3 T = normalMatrix * atang;
+    vec3 N = normalMatrix * aNormal;
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = normalMatrix*abitang;
+    mat3 TBN=mat3(1.0f);
+    if(knActive==1){
+        TBN = inverse(mat3(T, B, N));
+    }
 
-    dataOut.vertexPos=vec3(modelMatrix*vec4(position,1.f));
-    dataOut.normal=normalMatrix*normal;
-    dataOut.positionPL[0]= PositionPL[0];
-    dataOut.positionPL[1]= PositionPL[1];
-    dataOut.positionSP= PositionSP;
-    dataOut.directionSP= DirectionSP;
-    dataOut.directionAL= DirectionAL;
-    dataOut.viewPos= viewPos;
+    dataOut.normal= normalMatrix*normal;
+    dataOut.vertexPos= TBN*vec3(modelMatrix*vec4(position,1.f));
+    dataOut.positionPL[0]= TBN*PositionPL[0];
+    dataOut.positionPL[1]= TBN*PositionPL[1];
+    dataOut.positionSP= TBN*PositionSP;
+    dataOut.directionSP= TBN*DirectionSP;
+    dataOut.directionAL= TBN*DirectionAL;
+    dataOut.viewPos= TBN*viewPos;
     gl_Position=mvpMatrix*vec4(position,1.0f);
 	vTexture=texture;
 }

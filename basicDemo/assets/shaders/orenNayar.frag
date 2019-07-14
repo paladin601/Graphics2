@@ -53,7 +53,9 @@ struct Material{
     float IORout;
     int kreflect;
     int krefract;
+    int kn;
     sampler2D kdTexture;
+    sampler2D knTexture;
 };
 
 uniform Material objMaterial;
@@ -138,6 +140,12 @@ vec3 SpotLightCon(SpotLight light, vec3 normal, vec3 lightDir,vec3 viewDir,vec3 
 
 void main() {   
     vec3 normal=normalize(dataIn.normal);
+    if(objMaterial.kn==1){
+        normal= texture(objMaterial.knTexture, vTexture).rgb;
+        normal=normalize(normal*2.0f-vec3(1.0f));
+    }
+
+    
     vec3 viewDir=normalize(dataIn.viewPos-dataIn.vertexPos);
     vec3 lightContribution=vec3(0.0f);
 
