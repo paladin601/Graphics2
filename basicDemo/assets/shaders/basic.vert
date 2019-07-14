@@ -34,13 +34,14 @@ void main() {
     vec3 aNormal=normalize(normal);
     vec3 atang=normalize(aTangent);
     vec3 abitang=normalize(aBitangent);
-    vec3 T = normalMatrix * atang;
-    vec3 N = normalMatrix * aNormal;
+    mat3 model=mat3(modelMatrix);
+    vec3 T = normalize( model * atang);
+    vec3 N = normalize(model * aNormal);
     T = normalize(T - dot(T, N) * N);
-    vec3 B = normalMatrix*abitang;
+    vec3 B = cross(N,T);
     mat3 TBN=mat3(1.0f);
     if(knActive==1){
-        TBN = inverse(mat3(T, B, N));
+        TBN = transpose(mat3(T, B, N));
     }
 
     dataOut.normal= normalMatrix*normal;

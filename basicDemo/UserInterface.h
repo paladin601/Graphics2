@@ -25,13 +25,13 @@ private:
 	glm::vec3 positionMesh, scaleMesh, rotateMesh;
 	glm::vec3 positionGeometry, scaleGeometry, rotateGeometry;
 	glm::vec3 colorSpecularGeometry, colorAmbientGeometry, colorDiffuseGeometry;
-	float shininess, roughness ,iReflect,factorReflect;
+	float shininess, roughness ,iReflect,factorReflect, heightScale;
 	DeployTypeMaterial mMaterial;
 	glm::vec3 colorSpecularDL, colorAmbientDL, colorDiffuseDL;
 	glm::vec3 DLAmbient;
 	glm::vec3 colorSpecularSL, colorAmbientSL, colorDiffuseSL;
 	float cutOffSL, outerCutOffSL, constantSL, linearSL, quadraticSL;
-	bool activeDL, activeSL, activePL1, activePL2,kdMesh,ksMesh, knMesh ,reflectMesh,refractMesh;
+	bool activeDL, activeSL, activePL1, activePL2,kdMesh,ksMesh, knMesh, kdepth ,reflectMesh,refractMesh;
 
 	glm::vec3 colorSpecularPL1, colorAmbientPL1, colorDiffusePL1;
 	glm::vec3 colorSpecularPL2, colorAmbientPL2, colorDiffusePL2;
@@ -46,6 +46,9 @@ public:
 	static CUserInterface * Instance();
 	~CUserInterface();
 	void reshape();
+
+	float getHeightScale();
+	void setHeightScale(float);
 
 	void setIReflect(float value);
 	float getIReflect();
@@ -65,9 +68,11 @@ public:
 	void setMeshKD(int coeficient);
 	void setMeshKS(int coeficient);
 	void setMeshKN(int coeficient);
+	void setMeshKDepth(int coeficient);
 	int getMeshKD();
 	int getMeshKS();
 	int getMeshKN();
+	int getMeshKDepth();
 
 	int getMeshPicked();
 	int getGeometryPicked();

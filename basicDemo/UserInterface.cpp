@@ -66,8 +66,9 @@ CUserInterface::CUserInterface()
 	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=9");
 
 	TwAddVarRW(mUserInterface, "I Reflect Mesh", TW_TYPE_FLOAT, &iReflect, "label='Indice Reflect' group='Factor' step=0.01 min=0.5");
-	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Factor' step=0.01 min=1");
-	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Factor' step=0.01 min=1");
+	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Factor' step=0.01 min=0.1");
+	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Factor' step=0.01 min=0.1");
+	TwAddVarRW(mUserInterface, "Height Mesh", TW_TYPE_FLOAT, &heightScale, "label='Height Scale PM' group='Factor' step=0.001 min=0.001");
 	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='Factor' step=0.01");
 	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='Factor' step=0.01");
 	TwAddVarRW(mUserInterface, "factor Reflect Mesh", TW_TYPE_FLOAT, &factorReflect, "label='Factor Reflect CT' group='Factor' step=0.01 min=0.0");
@@ -75,6 +76,7 @@ CUserInterface::CUserInterface()
 	TwAddVarRW(mUserInterface, "kd Mesh", TW_TYPE_BOOLCPP, &kdMesh, "label='Diffuse texture' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "ks Mesh", TW_TYPE_BOOLCPP, &ksMesh, "label='Specular texture' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "kn Mesh", TW_TYPE_BOOLCPP, &knMesh, "label='Normal Mapping' group='Active Mesh'");
+	TwAddVarRW(mUserInterface, "parallax Mesh", TW_TYPE_BOOLCPP, &kdepth, "label='Parallax Mapping' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "reflect Mesh", TW_TYPE_BOOLCPP, &reflectMesh, "label='Reflect' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "refract Mesh", TW_TYPE_BOOLCPP, &refractMesh, "label='Refract' group='Active Mesh'");
 
@@ -210,6 +212,16 @@ CUserInterface::~CUserInterface()
 void CUserInterface::reshape()
 {
 	TwWindowSize(windowWidth, windowHeight);
+}
+
+float CUserInterface::getHeightScale()
+{
+	return heightScale;
+}
+
+void CUserInterface::setHeightScale(float value)
+{
+	heightScale = value;
 }
 
 void CUserInterface::setIReflect(float value)
@@ -637,6 +649,16 @@ void CUserInterface::setMeshKN(int coeficient)
 	}
 }
 
+void CUserInterface::setMeshKDepth(int coeficient)
+{
+	if (coeficient == 1) {
+		kdepth = true;
+	}
+	else {
+		kdepth = false;
+	}
+}
+
 int CUserInterface::getMeshKD()
 {
 	if (kdMesh) {
@@ -660,6 +682,16 @@ int CUserInterface::getMeshKS()
 int CUserInterface::getMeshKN()
 {
 	if (knMesh) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+int CUserInterface::getMeshKDepth()
+{
+	if (kdepth) {
 		return 1;
 	}
 	else {

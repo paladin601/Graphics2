@@ -2,6 +2,7 @@
 
 Mesh::Mesh()
 {
+	heightScale = 0.01f;
 	shininess = 128.0f;
 	roughness = 0.2f;
 	reflect = refract = kd = ks  = 0;
@@ -95,6 +96,11 @@ int Mesh::getKN()
 	return kn;
 }
 
+int Mesh::getKDepth()
+{
+	return kdepth;
+}
+
 int Mesh::getReflect()
 {
 	return reflect;
@@ -123,6 +129,16 @@ float Mesh::getShininess()
 float Mesh::getRoughness()
 {
 	return roughness;
+}
+
+float Mesh::getHeightScale()
+{
+	return heightScale;
+}
+
+void Mesh::setHeightScale(float value)
+{
+	heightScale = value;
 }
 
 void Mesh::setShininess(float value)
@@ -170,6 +186,11 @@ void Mesh::setKN(int coeficient)
 	kn = coeficient;
 }
 
+void Mesh::setKDepth(int coeficient)
+{
+	kdepth = coeficient;
+}
+
 void Mesh::setTextureCubeMap(int textureid)
 {
 	textureCubeMap = textureid;
@@ -185,11 +206,12 @@ void Mesh::setIORout(float out)
 	IORout = out;
 }
 
-void Mesh::setTextureGeometry(int geometry, int texturePosKd ,int texturePosKs, int texturePosKn)
+void Mesh::setTextureGeometry(int geometry, int texturePosKd ,int texturePosKs, int texturePosKn,int texturePosKdepth)
 {
 	geo[geometry]->setTextureKD(texturePosKd);
 	geo[geometry]->setTextureKS(texturePosKs);
 	geo[geometry]->setTextureNM(texturePosKn);
+	geo[geometry]->setTextureKDepth(texturePosKdepth);
 }
 
 void Mesh::setMaterialType(int a)

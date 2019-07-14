@@ -59,14 +59,23 @@ struct Material{
     int kreflect;
     int krefract;
     int kn;
+    int kdepth;
     sampler2D kdTexture;
     sampler2D ksTexture;
     sampler2D knTexture;
+    sampler2D depthTexture;
 };
 
 uniform Material objMaterial;
-
+uniform float height_scale=0.1f;
 uniform samplerCube skybox;
+
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{ 
+    float height =  texture(objMaterial.depthTexture, texCoords).r;    
+    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
+    return texCoords - p;    
+} 
 
 float Attenuation(float constant,float linear,float quadratic, float distance){
     return 1.0/(constant+linear * distance + quadratic * (distance*distance));
@@ -123,26 +132,33 @@ vec3 SpotLightCon(SpotLight light, vec3 normal, vec3 lightDir,vec3 viewDir,vec3 
 }
 
 void main() {   
+    vec3 viewDir=normalize(dataIn.viewPos-dataIn.vertexPos);
+
+    vec2 texCoords = vTexture;
+    if(objMaterial.kdepth==1){
+        texCoords=ParallaxMapping(texCoords,  viewDir);
+    }
+
+
     vec3 normal=normalize(dataIn.normal);
     if(objMaterial.kn==1){
-        normal= texture(objMaterial.knTexture, vTexture).rgb;
+        normal= texture(objMaterial.knTexture, texCoords).rgb;
         normal=normalize(normal*2.0f-vec3(1.0f));
     }
 
     
-    vec3 viewDir=normalize(dataIn.viewPos-dataIn.vertexPos);
     vec3 lightContribution=vec3(0.0f);
 
 
 
     vec3 kd=objMaterial.DifusseColor;
-    if(texture2D(objMaterial.kdTexture, vTexture).a < 0.1)
+    if(texture2D(objMaterial.kdTexture, texCoords).a < 0.1)
         discard;
-    kd*=texture2D(objMaterial.kdTexture, vTexture).rgb;
+    kd*=texture2D(objMaterial.kdTexture, texCoords).rgb;
     vec3 ks=objMaterial.SpecularColor;
-    if(texture2D(objMaterial.ksTexture, vTexture).a < 0.1)
+    if(texture2D(objMaterial.ksTexture, texCoords).a < 0.1)
         discard;
-    ks*=texture2D(objMaterial.ksTexture, vTexture).rgb;
+    ks*=texture2D(objMaterial.ksTexture, texCoords).rgb;
 
 
 

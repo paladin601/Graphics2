@@ -55,6 +55,11 @@ void Geometry::setTextureKS(int textureid)
 	textureKS = textureid;
 }
 
+void Geometry::setTextureKDepth(int textureid)
+{
+	textureDepth = textureid;
+}
+
 void Geometry::setName(string namegeo)
 {
 	name = namegeo;
@@ -128,6 +133,11 @@ int Geometry::getTextureKD()
 int Geometry::getTextureKS()
 {
 	return textureKS;
+}
+
+int Geometry::getTextureKDepth()
+{
+	return textureDepth;
 }
 
 vector<glm::vec3> Geometry::getTangent()

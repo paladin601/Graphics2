@@ -25,7 +25,7 @@ private:
 	vector<unsigned int> VBO;
 	Transform transform;
 	unsigned int VAO;
-	int textureKD, textureKS, textureNM;
+	int textureKD, textureKS, textureNM,textureDepth;
 	string name;
 	int sizeVertex;
 	int materialType;
@@ -44,6 +44,7 @@ public:
 	void setTextureNM(int textureid);
 	void setTextureKD(int textureid);
 	void setTextureKS(int textureid);
+	void setTextureKDepth(int textureid);
 
 
 	void setName(string name);
@@ -66,6 +67,7 @@ public:
 	int getTextureNM();
 	int getTextureKD();
 	int getTextureKS();
+	int getTextureKDepth();
 	vector<glm::vec3> getTangent();
 	vector<glm::vec3> getBitangent();
 	int getVAO();
