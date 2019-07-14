@@ -125,18 +125,20 @@ void main() {
     vec3 normal=normalize(dataIn.normal);
     vec3 viewDir=normalize(viewPos-dataIn.vertexPos);
     vec3 lightContribution=vec3(0.0f);
+
+
+
     vec3 kd=objMaterial.DifusseColor;
-    if(objMaterial.kd==1){
-        if(texture2D(objMaterial.kdTexture, vTexture).a < 0.1)
-            discard;
-        kd=texture2D(objMaterial.kdTexture, vTexture).rgb;
-    }
+    if(texture2D(objMaterial.kdTexture, vTexture).a < 0.1)
+        discard;
+    kd*=texture2D(objMaterial.kdTexture, vTexture).rgb;
     vec3 ks=objMaterial.SpecularColor;
-    if(objMaterial.ks==1){
-        if(texture2D(objMaterial.ksTexture, vTexture).a < 0.1)
-            discard;
-        ks=texture2D(objMaterial.ksTexture, vTexture).rgb;
-    }
+    if(texture2D(objMaterial.ksTexture, vTexture).a < 0.1)
+        discard;
+    ks*=texture2D(objMaterial.ksTexture, vTexture).rgb;
+
+
+
     if(ambientLight.Active == 1){
         lightContribution=AmbientLightCon(ambientLight,normal,normalize(-ambientLight.Direction),viewDir,kd,ks);
     }

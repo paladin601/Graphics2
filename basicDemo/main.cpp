@@ -184,10 +184,6 @@ void processKeyboardInput(GLFWwindow *window)
 		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 		shaders.push_back(shader);
-		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/reflect.frag");
-		shaders.push_back(shader);
-		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/refract.frag");
-		shaders.push_back(shader);
 
 	}
 
@@ -516,10 +512,6 @@ bool init()
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 	shaders.push_back(shader);
-	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/reflect.frag");
-	shaders.push_back(shader);
-	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/refract.frag");
-	shaders.push_back(shader);
 
 
 	vector<string> faces
@@ -577,7 +569,6 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
 	//31
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
-
 
 
 
@@ -702,18 +693,18 @@ void activeShader(int shaderSelect) {
 	MVP = Projection * View* Model;
 
 	int ks, kd, kn;
-	if (mesh->getKD()) {
-		kd = true;
+	if (mesh->getKD()==1) {
+		kd = 1;
 	}
 	else {
-		kd = geo->getKD();
+		kd = 0;
 	}
 
-	if (mesh->getKS()) {
-		ks = true;
+	if (mesh->getKS()==1) {
+		ks = 1;
 	}
 	else {
-		ks = geo->getKS();
+		ks = 0;
 	}
 
 	shaders[shaderSelect]->use();
@@ -727,8 +718,10 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setVec3("objMaterial.AmbientColor", geo->material.ambient);
 	shaders[shaderSelect]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
 	shaders[shaderSelect]->setFloat("objMaterial.roughness", geo->material.roughness);
-	shaders[shaderSelect]->setInt("objMaterial.kd", kd);
-	shaders[shaderSelect]->setInt("objMaterial.kdTexture", 1);
+	
+
+
+	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (kd==1 ? 1:4) );
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
 	shaders[shaderSelect]->setFloat("objMaterial.IORout", mesh->getIORout());
 	shaders[shaderSelect]->setInt("objMaterial.kreflect", mesh->getReflect());
@@ -737,8 +730,8 @@ void activeShader(int shaderSelect) {
 	if (shaderSelect != 2) {//2 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", geo->material.shininess);
-		shaders[shaderSelect]->setInt("objMaterial.ks",ks);
-		shaders[shaderSelect]->setInt("objMaterial.ksTexture", 2);
+
+		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (ks==1)?2:4 );
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);
 		shaders[shaderSelect]->setVec3("spotLight.SpecularColor", spotLight->specular);
 	}
@@ -797,6 +790,10 @@ void activeTexture() {
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
+
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));
 }
 
 void render()
