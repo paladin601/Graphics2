@@ -708,19 +708,24 @@ void activeShader(int shaderSelect) {
 	}
 
 	shaders[shaderSelect]->use();
-	shaders[shaderSelect]->setInt("ambientLight.Active", Ambient->active);
+	shaders[shaderSelect]->setVec3("PositionPL[0]", pointLights[0]->position);
+	shaders[shaderSelect]->setVec3("PositionPL[1]", pointLights[1]->position);
+	shaders[shaderSelect]->setVec3("PositionSP", camera->Position);
+	shaders[shaderSelect]->setVec3("DirectionSP", camera->Front);
+	shaders[shaderSelect]->setVec3("DirectionAL", Ambient->direction);
 	shaders[shaderSelect]->setVec3("viewPos", camera->Position);
+
+
+
+	shaders[shaderSelect]->setInt("ambientLight.Active", Ambient->active);
 	shaders[shaderSelect]->setVec3("ambientLight.AmbientColor", Ambient->ambient);
 	shaders[shaderSelect]->setVec3("ambientLight.DifusseColor", Ambient->diffuse);
-	shaders[shaderSelect]->setVec3("ambientLight.Direction", Ambient->direction);
 	shaders[shaderSelect]->setInt("skybox", 0);
 
 	shaders[shaderSelect]->setVec3("objMaterial.AmbientColor", geo->material.ambient);
 	shaders[shaderSelect]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
 	shaders[shaderSelect]->setFloat("objMaterial.roughness", geo->material.roughness);
 	
-
-
 	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (kd==1 ? 1:4) );
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
 	shaders[shaderSelect]->setFloat("objMaterial.IORout", mesh->getIORout());
@@ -737,8 +742,6 @@ void activeShader(int shaderSelect) {
 	}
 
 	shaders[shaderSelect]->setInt("spotLight.Active", spotLight->active);
-	shaders[shaderSelect]->setVec3("spotLight.Position", camera->Position);
-	shaders[shaderSelect]->setVec3("spotLight.Direction", camera->Front);
 	shaders[shaderSelect]->setFloat("spotLight.CuttOff", glm::cos(glm::radians(spotLight->cutOff)));
 	shaders[shaderSelect]->setFloat("spotLight.OuterCutOff", glm::cos(glm::radians(spotLight->outerCutOff)));
 	shaders[shaderSelect]->setVec3("spotLight.AmbientColor", spotLight->ambient);
@@ -750,8 +753,7 @@ void activeShader(int shaderSelect) {
 	int s;
 	for (s = 0; s < pointLights.size(); s++) {
 		shaders[shaderSelect]->setInt("pointLight[" + to_string(s) + "].Active", pointLights[s]->active);
-		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].Position", pointLights[s]->position);
-		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "]Light.AmbientColor", pointLights[s]->ambient);
+		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].AmbientColor", pointLights[s]->ambient);
 		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].DifusseColor", pointLights[s]->diffuse);
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Constant", pointLights[s]->constant);
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Linear", pointLights[s]->linear);
