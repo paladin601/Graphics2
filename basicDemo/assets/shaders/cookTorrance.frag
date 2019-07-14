@@ -42,7 +42,7 @@ struct PointLight{
 };
  
 #define NR_POINT_LIGHTS 2
-float factReflec = 0.8f;
+uniform float factReflec;
 
 uniform AmbientLight ambientLight;
 uniform SpotLight spotLight;
@@ -56,6 +56,7 @@ struct Material{
     float roughness;
     float IORin;
     float IORout;
+    float IReflect;
     int kreflect;
     int krefract;
     int kn;
@@ -206,19 +207,21 @@ void main() {
         lightContribution+=SpotLightCon(spotLight,normal,normalize(dataIn.positionSP-dataIn.vertexPos),viewDir,kd,ks);
     }
 
-    vec4 r=vec4(1.0f);
+    vec3 refr=vec3(1.0f);
     if(objMaterial.krefract==1){
         viewDir=normalize(dataIn.vertexPos-dataIn.viewPos);
         float RefractInd= objMaterial.IORout/objMaterial.IORin;
         vec3 R = refract(viewDir, normal,RefractInd);
-        r=vec4(texture(skybox,R).rgb,1.0f); 
+        refr=texture(skybox,R).rgb; 
     }
+    vec3 refl=vec3(1.0f);
     if(objMaterial.kreflect==1){
         viewDir=normalize(dataIn.vertexPos-dataIn.viewPos);
         vec3 R = reflect(viewDir, normal);
-        r=vec4(texture(skybox,R).rgb,1.0f);
+        refl=texture(skybox,R).rgb;
+        refl=objMaterial.IReflect*refl;
     }
 
 
-    fragColor= vec4(lightContribution, 1.0f)*r;
+    fragColor= vec4(lightContribution*refl*refr, 1.0f);
 }

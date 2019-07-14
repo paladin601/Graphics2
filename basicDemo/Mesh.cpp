@@ -2,6 +2,8 @@
 
 Mesh::Mesh()
 {
+	shininess = 128.0f;
+	roughness = 0.2f;
 	reflect = refract = kd = ks  = 0;
 	kn = 1;
 	translate = glm::vec3(0.0f);
@@ -12,6 +14,8 @@ Mesh::Mesh()
 	materialType = -1;
 	IORout = 1.0f;
 	IORin = 1.52f;
+	IReflect = 1.0f;
+	FactorReflect = 0.8f;
 }
 
 
@@ -99,6 +103,46 @@ int Mesh::getReflect()
 int Mesh::getRefract()
 {
 	return refract;
+}
+
+float Mesh::getIReflect()
+{
+	return IReflect;
+}
+
+float Mesh::getFactorReflect()
+{
+	return FactorReflect;
+}
+
+float Mesh::getShininess()
+{
+	return shininess;
+}
+
+float Mesh::getRoughness()
+{
+	return roughness;
+}
+
+void Mesh::setShininess(float value)
+{
+	shininess = value;
+}
+
+void Mesh::setRoughness(float value)
+{
+	roughness = value;
+}
+
+void Mesh::setIReflect(float value)
+{
+	IReflect = value;
+}
+
+void Mesh::setFactorReflect(float value)
+{
+	FactorReflect = value;
 }
 
 void Mesh::setReflect(int active)

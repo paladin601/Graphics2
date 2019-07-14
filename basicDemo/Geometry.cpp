@@ -55,21 +55,6 @@ void Geometry::setTextureKS(int textureid)
 	textureKS = textureid;
 }
 
-void Geometry::setKD(int active)
-{
-	kd = active;
-}
-
-void Geometry::setKS(int active)
-{
-	ks = active;
-}
-
-void Geometry::setKN(int active)
-{
-	kn = active;
-}
-
 void Geometry::setName(string namegeo)
 {
 	name = namegeo;
@@ -130,21 +115,6 @@ glm::vec3 Geometry::getScale()
 	return scale;
 }
 
-int Geometry::getKD()
-{
-	return kd;
-}
-
-int Geometry::getKS()
-{
-	return ks;
-}
-
-int Geometry::getKN()
-{
-	return kn;
-}
-
 int Geometry::getTextureNM()
 {
 	return textureNM;
@@ -199,7 +169,6 @@ vector<glm::vec3> Geometry::getNormals()
 
 Geometry::Geometry()
 {
-	kd = ks = kn = 0;
 	materialType = 0;
 	translate = glm::vec3(0.0f);
 	scale = glm::vec3(1.0f);

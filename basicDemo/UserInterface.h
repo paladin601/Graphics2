@@ -25,13 +25,13 @@ private:
 	glm::vec3 positionMesh, scaleMesh, rotateMesh;
 	glm::vec3 positionGeometry, scaleGeometry, rotateGeometry;
 	glm::vec3 colorSpecularGeometry, colorAmbientGeometry, colorDiffuseGeometry;
-	float shininess, roughness;
+	float shininess, roughness ,iReflect,factorReflect;
 	DeployTypeMaterial mMaterial;
 	glm::vec3 colorSpecularDL, colorAmbientDL, colorDiffuseDL;
 	glm::vec3 DLAmbient;
 	glm::vec3 colorSpecularSL, colorAmbientSL, colorDiffuseSL;
 	float cutOffSL, outerCutOffSL, constantSL, linearSL, quadraticSL;
-	bool activeDL, activeSL, activePL1, activePL2,kd,ks,kdMesh,ksMesh, knMesh ,reflectMesh,refractMesh;
+	bool activeDL, activeSL, activePL1, activePL2,kdMesh,ksMesh, knMesh ,reflectMesh,refractMesh;
 
 	glm::vec3 colorSpecularPL1, colorAmbientPL1, colorDiffusePL1;
 	glm::vec3 colorSpecularPL2, colorAmbientPL2, colorDiffusePL2;
@@ -47,14 +47,16 @@ public:
 	~CUserInterface();
 	void reshape();
 
+	void setIReflect(float value);
+	float getIReflect();
+	void setFactorReflect(float value);
+	float getFactorReflect();
+
+
+
 	int  getMeshMaterialPicked();
 	void setMeshMaterialPicked(int);
 
-
-	void setKD(int coeficient);
-	void setKS(int coeficient);
-	int getKD();
-	int getKS();
 	int getReflect();
 	int getRefract();
 

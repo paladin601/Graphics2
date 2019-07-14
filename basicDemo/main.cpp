@@ -380,6 +380,10 @@ void updateDataMesh() {
 	meshes[meshPicked]->setKN(userInterface->getMeshKN());
 	meshes[meshPicked]->setReflect(userInterface->getReflect());
 	meshes[meshPicked]->setRefract(userInterface->getRefract());
+	meshes[meshPicked]->setIReflect(userInterface->getIReflect());
+	meshes[meshPicked]->setFactorReflect(userInterface->getFactorReflect());
+	meshes[meshPicked]->setShininess(userInterface->getShininessGeometry());
+	meshes[meshPicked]->setRoughness(userInterface->getRoughnessGeometry());
 
 	geo = meshes[meshPicked]->getGeometry(geometryPicked);
 	geo->setTranslate(userInterface->getGeometryTranslate());
@@ -388,11 +392,6 @@ void updateDataMesh() {
 	geo->material.ambient = userInterface->getColorAmbientGeometry();
 	geo->material.specular = userInterface->getColorSpecularGeometry();
 	geo->material.diffuse = userInterface->getColorDiffuseGeometry();
-	geo->material.shininess = userInterface->getShininessGeometry();
-	geo->material.roughness = userInterface->getRoughnessGeometry();
-	geo->setKD(userInterface->getKD());
-	geo->setKS(userInterface->getKS());
-
 }
 
 
@@ -406,10 +405,6 @@ void updateGeometrydata() {
 	userInterface->setColorAmbientGeometry(geo->material.ambient);
 	userInterface->setColorDiffuseGeometry(geo->material.diffuse);
 	userInterface->setColorSpecularGeometry(geo->material.specular);
-	userInterface->setShininessGeometry(geo->material.shininess);
-	userInterface->setRoughnessGeometry(geo->material.roughness);
-	userInterface->setKD(geo->getKD());
-	userInterface->setKS(geo->getKS());
 }
 
 
@@ -422,12 +417,16 @@ void updateDataInterface() {
 	userInterface->setMeshRotate(meshes[meshPicked]->getRotate());
 	userInterface->setIORin(meshes[meshPicked]->getIORin());
 	userInterface->setIORout(meshes[meshPicked]->getIORout());
+	userInterface->setShininessGeometry(meshes[meshPicked]->getShininess());
+	userInterface->setRoughnessGeometry(meshes[meshPicked]->getRoughness());
 	
 	userInterface->setMeshKD(meshes[meshPicked]->getKD());
 	userInterface->setMeshKS(meshes[meshPicked]->getKS());
 	userInterface->setMeshKN(meshes[meshPicked]->getKN());
 	userInterface->setReflect(meshes[meshPicked]->getReflect());
 	userInterface->setRefract(meshes[meshPicked]->getRefract());
+	userInterface->setIReflect(meshes[meshPicked]->getIReflect());
+	userInterface->setFactorReflect(meshes[meshPicked]->getFactorReflect());
 
 	updateGeometrydata();
 }
@@ -734,7 +733,9 @@ void activeShader(int shaderSelect) {
 
 	shaders[shaderSelect]->setVec3("objMaterial.AmbientColor", geo->material.ambient);
 	shaders[shaderSelect]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
-	shaders[shaderSelect]->setFloat("objMaterial.roughness", geo->material.roughness);
+	shaders[shaderSelect]->setFloat("objMaterial.roughness", mesh->getRoughness());
+	shaders[shaderSelect]->setFloat("objMaterial.IReflect", mesh->getIReflect());
+	shaders[shaderSelect]->setFloat("factReflec", mesh->getFactorReflect());
 	
 	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (mesh->getKD()==1) ? 1:4 );
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
@@ -747,7 +748,7 @@ void activeShader(int shaderSelect) {
 
 	if (shaderSelect != 3) {//3 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
-		shaders[shaderSelect]->setFloat("objMaterial.shininess", geo->material.shininess);
+		shaders[shaderSelect]->setFloat("objMaterial.shininess", mesh->getShininess());
 
 		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (mesh->getKS()==1)?2:4 );
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);

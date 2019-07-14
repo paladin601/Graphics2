@@ -26,7 +26,6 @@ private:
 	Transform transform;
 	unsigned int VAO;
 	int textureKD, textureKS, textureNM;
-	int kd, ks,kn;
 	string name;
 	int sizeVertex;
 	int materialType;
@@ -45,9 +44,7 @@ public:
 	void setTextureNM(int textureid);
 	void setTextureKD(int textureid);
 	void setTextureKS(int textureid);
-	void setKD(int active);
-	void setKS(int active);
-	void setKN(int active);
+
 
 	void setName(string name);
 	void setSizeVertex(int size);
@@ -65,9 +62,7 @@ public:
 	glm::vec3 getRotate();
 	glm::vec3 getScale();
 
-	int getKD();
-	int getKS();
-	int getKN();
+
 	int getTextureNM();
 	int getTextureKD();
 	int getTextureKS();

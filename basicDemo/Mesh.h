@@ -21,7 +21,7 @@ private:
 	glm::vec3 translate, rotate, scale;
 	int materialType;
 	int n;
-	float IORin, IORout;
+	float IORin, IORout,IReflect, FactorReflect,shininess,roughness;
 	int kd, ks, kn, reflect, refract;
 	int textureCubeMap;
 public:
@@ -41,7 +41,16 @@ public:
 	int getKN();
 	int getReflect();
 	int getRefract();
+	float getIReflect();
+	float getFactorReflect();
+	float getShininess();
+	float getRoughness();
+	
 
+	void setShininess(float value);
+	void setRoughness(float value);
+	void setIReflect(float active);
+	void setFactorReflect(float active);
 	void setReflect(int active);
 	void setRefract(int active);
 	void setKS(int coeficient);

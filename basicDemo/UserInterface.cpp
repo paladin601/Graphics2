@@ -28,7 +28,6 @@ CUserInterface::CUserInterface()
 	activeSL = false;
 	activePL1 = false;
 	activePL2 = false;
-	kd = ks = false;
 	colorAmbientSL = colorAmbientPL1 = colorAmbientPL2 = glm::vec3(0.495f);
 	colorDiffuseSL = glm::vec3(1.0f);
 	colorSpecularSL = glm::vec3(1.0f);
@@ -64,6 +63,15 @@ CUserInterface::CUserInterface()
 
 	TwAddVarRW(mUserInterface, "Material Mesh", DeployTwTypeMaterial, &mMaterial, "label='Selected Material' group='Mesh'");
 
+	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=9");
+
+	TwAddVarRW(mUserInterface, "I Reflect Mesh", TW_TYPE_FLOAT, &iReflect, "label='Indice Reflect' group='Factor' step=0.01 min=0.5");
+	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Factor' step=0.01 min=1");
+	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Factor' step=0.01 min=1");
+	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='Factor' step=0.01");
+	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='Factor' step=0.01");
+	TwAddVarRW(mUserInterface, "factor Reflect Mesh", TW_TYPE_FLOAT, &factorReflect, "label='Factor Reflect CT' group='Factor' step=0.01 min=0.0");
+
 	TwAddVarRW(mUserInterface, "kd Mesh", TW_TYPE_BOOLCPP, &kdMesh, "label='Diffuse texture' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "ks Mesh", TW_TYPE_BOOLCPP, &ksMesh, "label='Specular texture' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "kn Mesh", TW_TYPE_BOOLCPP, &knMesh, "label='Normal Mapping' group='Active Mesh'");
@@ -74,10 +82,6 @@ CUserInterface::CUserInterface()
 
 
 
-
-	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=9");
-	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Refract Mesh' step=0.01 min=1");
-	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Refract Mesh' step=0.01 min=1");
 
 	TwAddVarRW(mUserInterface, "Position X Mesh", TW_TYPE_FLOAT, &positionMesh.x, "label='X' group='Position Mesh' step=0.01");
 	TwAddVarRW(mUserInterface, "Position Y Mesh", TW_TYPE_FLOAT, &positionMesh.y, "label='Y' group='Position Mesh' step=0.01");
@@ -92,9 +96,6 @@ CUserInterface::CUserInterface()
 	TwAddVarRW(mUserInterface, "Select Geometry", TW_TYPE_INT8, &geometryPicked, "label='Selected Geometry' group='Geometry' min=0");
 	TwAddVarRO(mUserInterface, "Name Geometry", TW_TYPE_STDSTRING, &nameGeometry, "label='Name Geometry' group='Geometry'");
 
-	TwAddVarRW(mUserInterface, "Diffuse Geometry", TW_TYPE_BOOLCPP, &kd, "label='Diffuse texture' group='Geometry'");
-	TwAddVarRW(mUserInterface, "Specular Geometry", TW_TYPE_BOOLCPP, &ks, "label='Specular texture' group='Geometry'");
-
 	TwAddVarRW(mUserInterface, "Position X", TW_TYPE_FLOAT, &positionGeometry.x, "label='X' group='Position Geometry' step=0.01");
 	TwAddVarRW(mUserInterface, "Position Y", TW_TYPE_FLOAT, &positionGeometry.y, "label='Y' group='Position Geometry' step=0.01");
 	TwAddVarRW(mUserInterface, "Position Z", TW_TYPE_FLOAT, &positionGeometry.z, "label='Z' group='Position Geometry' step=0.01");
@@ -106,8 +107,7 @@ CUserInterface::CUserInterface()
 	TwAddVarRW(mUserInterface, "Color Ambient Geometry", TW_TYPE_COLOR3F, &colorAmbientGeometry, "label='Ambient Color' group='Material'");
 	TwAddVarRW(mUserInterface, "Color Diffuse Geometry", TW_TYPE_COLOR3F, &colorDiffuseGeometry, "label='Diffuse Color' group='Material'");
 	TwAddVarRW(mUserInterface, "Color Specular Geometry", TW_TYPE_COLOR3F, &colorSpecularGeometry, "label='Specular Color' group='Material'");
-	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='Factor' step=0.01");
-	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='Factor' step=0.01");
+
 
 
 	TwAddVarRW(mUserInterface, "Active DL", TW_TYPE_BOOLCPP, &activeDL, "label='ON/OFF' group='Directional Light'");
@@ -167,13 +167,12 @@ CUserInterface::CUserInterface()
 	TwDefine(" 'Tarea 1'/'Rotate Mesh'   group='Transform Mesh' opened=false");
 	TwDefine(" 'Tarea 1'/'Transform Mesh' group=Mesh opened=false");
 	TwDefine(" 'Tarea 1'/'Active Mesh' group=Mesh opened=false");
-	TwDefine(" 'Tarea 1'/'Refract Mesh' group=Mesh opened=false");
+	TwDefine(" 'Tarea 1'/Factor group=Mesh opened=false");
 
 
 
 	TwDefine(" 'Tarea 1'/Geometry opened=false group=Mesh ");
 	TwDefine(" 'Tarea 1'/Material group=Geometry opened=false");
-	TwDefine(" 'Tarea 1'/Factor group=Material opened=true");
 	TwDefine(" 'Tarea 1'/'Position Geometry' group=Transform opened=false");
 	TwDefine(" 'Tarea 1'/'Scale Geometry' group=Transform opened=false");
 	TwDefine(" 'Tarea 1'/'Rotate Geometry' group=Transform opened=false");
@@ -202,8 +201,6 @@ CUserInterface::CUserInterface()
 	TwDefine(" 'Tarea 1'/PositionPL2 group='Point Light 2' opened=false ");
 	TwDefine(" 'Tarea 1'/AttenuationPL2 group='Point Light 2' opened=false ");
 
-
-
 }
 
 CUserInterface::~CUserInterface()
@@ -213,6 +210,26 @@ CUserInterface::~CUserInterface()
 void CUserInterface::reshape()
 {
 	TwWindowSize(windowWidth, windowHeight);
+}
+
+void CUserInterface::setIReflect(float value)
+{
+	iReflect = value;
+}
+
+float CUserInterface::getIReflect()
+{
+	return iReflect;
+}
+
+void CUserInterface::setFactorReflect(float value)
+{
+	factorReflect = value;
+}
+
+float CUserInterface::getFactorReflect()
+{
+	return factorReflect;
 }
 
 int CUserInterface::getMeshMaterialPicked()
@@ -239,50 +256,9 @@ void CUserInterface::setMeshMaterialPicked(int idMaterial)
 	}
 }
 
-void CUserInterface::setKD(int coeficient)
-{
-	if (coeficient == 1) {
-		kd = true;
-	}
-	else {
-		kd = false;
-	}
-}
-
-void CUserInterface::setKS(int coeficient)
-{
-	if (coeficient == 1) {
-		ks = true;
-	}
-	else {
-		ks = false;
-	}
-}
-
-int CUserInterface::getKD()
-{
-	if (kd) {
-		return 1;
-	}
-	else {
-		return 0;
-	}
-}
-
-int CUserInterface::getKS()
-{
-	if (ks) {
-		return 1;
-	}
-	else {
-		return 0;
-	}
-}
-
 int CUserInterface::getReflect()
 {
 	if (reflectMesh) {
-		refractMesh = false;
 		return 1;
 	}
 	else {
@@ -293,7 +269,6 @@ int CUserInterface::getReflect()
 int CUserInterface::getRefract()
 {
 	if (refractMesh) {
-		reflectMesh = false;
 		return 1;
 	}
 	else {
