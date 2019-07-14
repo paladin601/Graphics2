@@ -551,7 +551,7 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/normalD.png"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/container2.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/container2_specular.jpg"));
-	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/brickwall.jpg"));
 
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dif/arm.jpg"));//6
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/reflect/arm.jpg"));
@@ -590,9 +590,11 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/glass.png"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
 	//31
-	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2_normal.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/brickwall_normal.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/normal_cube.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2_disp.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2_normal.jpg"));
 
 
 
@@ -613,6 +615,9 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick.obj"));
 
 	// Loads all the geometry into the GPU
 	/*
@@ -707,6 +712,25 @@ bool init()
 	meshes[12]->setTextureGeometry(6, 16, 17,30,33);
 	meshes[12]->setTextureCubeMap(0);
 
+	meshes[13]->setTranslate(glm::vec3(6.0f, 1.1f, -3.0f));
+	meshes[13]->setMaterialType(1);
+	meshes[13]->setTextureGeometry(0, 34, 1, 35, 33);
+	meshes[13]->setTextureCubeMap(0);
+	meshes[13]->setKDepth(1);
+
+	meshes[14]->setTranslate(glm::vec3(6.0f, 1.1f, -5.0f));
+	meshes[14]->setRotate(glm::vec3(0.0f, 180.0f, 0.0f));
+	meshes[14]->setMaterialType(1);
+	meshes[14]->setTextureGeometry(0, 34, 1, 35, 33);
+	meshes[14]->setTextureCubeMap(0);
+	meshes[14]->setKDepth(1);
+
+	meshes[15]->setTranslate(glm::vec3(6.0f, 1.1f, -1.0f));
+	meshes[15]->setRotate(glm::vec3(0.0f, 180.0f, 0.0f));
+	meshes[15]->setMaterialType(1);
+	meshes[15]->setTextureGeometry(0, 34, 1, 35, 33);
+	meshes[15]->setTextureCubeMap(0);
+	meshes[15]->setKDepth(1);
 
 	max = meshes.size();
 	for (i = 0; i < max; i++) {

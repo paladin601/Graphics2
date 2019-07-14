@@ -2,7 +2,7 @@
 
 Mesh::Mesh()
 {
-	heightScale = 0.01f;
+	heightScale = 0.06f;
 	shininess = 128.0f;
 	roughness = 0.2f;
 	reflect = refract = kd = ks  = 0;
