@@ -51,13 +51,13 @@ Mesh * ObjLoader::load(string path)
 						num++;
 						break;
 					case 1:
-						pos1 = temp_vertex[vertexIndices[i]];
-						uv1 = temp_uvs[uvIndices[i]];
+						pos2 = temp_vertex[vertexIndices[i]];
+						uv2 = temp_uvs[uvIndices[i]];
 						num++;
 						break;
 					case 2:
-						pos1 = temp_vertex[vertexIndices[i]];
-						uv1 = temp_uvs[uvIndices[i]];
+						pos3 = temp_vertex[vertexIndices[i]];
+						uv3 = temp_uvs[uvIndices[i]];
 						num = 0;
 
 						edge1 = pos2 - pos1;
@@ -67,20 +67,22 @@ Mesh * ObjLoader::load(string path)
 
 						float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
-						tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-						tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-						tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+						tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
 						tangent = glm::normalize(tangent);
 
-						bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-						bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-						bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+						bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
 						bitangent = glm::normalize(bitangent);
-
+						geo->setTangent(tangent);
+						geo->setTangent(tangent);
+						geo->setTangent(tangent);
+						geo->setBitangent(bitangent);
+						geo->setBitangent(bitangent);
+						geo->setBitangent(bitangent);
 
 						break;
 					}
 				}
+				num = 0;
 				max = 0;
 				vertexIndices.clear();
 				normalIndices.clear();
@@ -145,6 +147,44 @@ Mesh * ObjLoader::load(string path)
 		geo->setFace(temp_vertex[vertexIndices[i]]);
 		geo->setNormal(temp_normals[normalIndices[i]]);
 		geo->setUV(temp_uvs[uvIndices[i]]);
+		switch (num)
+		{
+		case 0:
+			pos1 = temp_vertex[vertexIndices[i]];
+			uv1 = temp_uvs[uvIndices[i]];
+			num++;
+			break;
+		case 1:
+			pos2 = temp_vertex[vertexIndices[i]];
+			uv2 = temp_uvs[uvIndices[i]];
+			num++;
+			break;
+		case 2:
+			pos3 = temp_vertex[vertexIndices[i]];
+			uv3 = temp_uvs[uvIndices[i]];
+			num = 0;
+
+			edge1 = pos2 - pos1;
+			edge2 = pos3 - pos1;
+			deltaUV1 = uv2 - uv1;
+			deltaUV2 = uv3 - uv1;
+
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+			tangent = f * (deltaUV2.y * edge1 - deltaUV1.y * edge2);
+			tangent = glm::normalize(tangent);
+
+			bitangent = f * (-deltaUV2.x * edge1 + deltaUV1.x * edge2);
+			bitangent = glm::normalize(bitangent);
+			geo->setTangent(tangent);
+			geo->setTangent(tangent);
+			geo->setTangent(tangent);
+			geo->setBitangent(bitangent);
+			geo->setBitangent(bitangent);
+			geo->setBitangent(bitangent);
+
+			break;
+		}
 	}
 	mesh->setGeometry(geo);
 	mesh->setKD(1);

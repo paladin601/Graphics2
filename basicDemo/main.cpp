@@ -751,7 +751,7 @@ void activeShader(int shaderSelect) {
 	for (s = 0; s < pointLights.size(); s++) {
 		shaders[shaderSelect]->setInt("pointLight[" + to_string(s) + "].Active", pointLights[s]->active);
 		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].Position", pointLights[s]->position);
-		shaders[shaderSelect]->setVec3("spotpointLight[" + to_string(s) + "]Light.AmbientColor", pointLights[s]->ambient);
+		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "]Light.AmbientColor", pointLights[s]->ambient);
 		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].DifusseColor", pointLights[s]->diffuse);
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Constant", pointLights[s]->constant);
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Linear", pointLights[s]->linear);
