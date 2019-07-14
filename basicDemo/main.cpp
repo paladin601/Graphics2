@@ -526,10 +526,10 @@ bool init()
 
 	textureIDS->setTexture(loaderTexture.loadCubeMap(faces));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/white.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/normalD.png"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/container2.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/container2_specular.jpg"));
-	textureIDS->setTexture(loaderTexture.load("assets/textures/hellfish.png"));
-	textureIDS->setTexture(loaderTexture.load("assets/textures/floor.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/brickwall.jpg"));
 
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dif/arm.jpg"));//6
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/reflect/arm.jpg"));
@@ -568,7 +568,7 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/glass.png"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
 	//31
-	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/brickwall_normal.jpg"));
 
 
 
@@ -607,14 +607,14 @@ bool init()
 
 	meshes[4]->setMaterialType(1);
 	meshes[4]->setTranslate(glm::vec3(-3.0f, 0.61f, 0.0f));
-	meshes[4]->setTextureGeometry(0, 2, 3,31);
+	meshes[4]->setTextureGeometry(0, 3, 4,31);
 	meshes[4]->setTextureCubeMap(0);
 
 
 
 	meshes[5]->setMaterialType(2);
 	meshes[5]->setTranslate(glm::vec3(-4.5f, 0.61f, 0.0f));
-	meshes[5]->setTextureGeometry(0, 2, 3,31);
+	meshes[5]->setTextureGeometry(0, 3, 4,31);
 	meshes[5]->setTextureCubeMap(0);
 
 
@@ -651,7 +651,7 @@ bool init()
 	meshes[9]->setTextureCubeMap(0);
 
 	meshes[10]->setTranslate(glm::vec3(-1.5f, 0.61f, -6.0f));
-	meshes[10]->setTextureGeometry(0, 2, 3,31);
+	meshes[10]->setTextureGeometry(0, 3, 4,31);
 	meshes[10]->setMaterialType(3);
 	meshes[10]->setTextureCubeMap(0);
 
@@ -727,7 +727,7 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setInt("objMaterial.kreflect", mesh->getReflect());
 	shaders[shaderSelect]->setInt("objMaterial.krefract", mesh->getRefract());
 
-	if (shaderSelect != 2) {//2 es orennayar
+	if (shaderSelect != 3) {//3 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", geo->material.shininess);
 
@@ -793,7 +793,9 @@ void activeTexture() {
 
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));
+	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));//disable specular and diffuse texture
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(2));//disable normal
 }
 
 void render()
@@ -832,12 +834,6 @@ void render()
 				break;
 			case 3:
 				activeShader(4);
-				break;
-			case 4:
-				activeShader(5);
-				break;
-			case 5:
-				activeShader(6);
 				break;
 			default:
 				if (pointLights[i]->active == 1) {

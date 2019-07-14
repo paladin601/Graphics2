@@ -38,8 +38,8 @@ CUserInterface::CUserInterface()
 	colorDiffusePL2 = glm::vec3(0.0f, 1.0f, 0.0f);
 	colorSpecularPL2 = glm::vec3(1.0f);
 
-	positionPL1 = glm::vec3(3.0f, 0.5f, -0.5f);
-	positionPL2 = glm::vec3(-3.0f, 0.5f, -0.5f);
+	positionPL1 = glm::vec3(3.0f, 1.5f, -0.5f);
+	positionPL2 = glm::vec3(-3.0f, 1.5f, -0.5f);
 	nameGeometry = "";
 	cutOffSL = 12.5f;
 	outerCutOffSL = 10.0f;
@@ -66,6 +66,7 @@ CUserInterface::CUserInterface()
 
 	TwAddVarRW(mUserInterface, "kd Mesh", TW_TYPE_BOOLCPP, &kdMesh, "label='Diffuse texture' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "ks Mesh", TW_TYPE_BOOLCPP, &ksMesh, "label='Specular texture' group='Active Mesh'");
+	TwAddVarRW(mUserInterface, "kn Mesh", TW_TYPE_BOOLCPP, &knMesh, "label='Normal Mapping' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "reflect Mesh", TW_TYPE_BOOLCPP, &reflectMesh, "label='Reflect' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "refract Mesh", TW_TYPE_BOOLCPP, &refractMesh, "label='Refract' group='Active Mesh'");
 
@@ -651,6 +652,16 @@ void CUserInterface::setMeshKS(int coeficient)
 	}
 }
 
+void CUserInterface::setMeshKN(int coeficient)
+{
+	if (coeficient == 1) {
+		knMesh = true;
+	}
+	else {
+		knMesh = false;
+	}
+}
+
 int CUserInterface::getMeshKD()
 {
 	if (kdMesh) {
@@ -664,6 +675,16 @@ int CUserInterface::getMeshKD()
 int CUserInterface::getMeshKS()
 {
 	if (ksMesh) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+int CUserInterface::getMeshKN()
+{
+	if (knMesh) {
 		return 1;
 	}
 	else {

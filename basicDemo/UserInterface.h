@@ -31,7 +31,7 @@ private:
 	glm::vec3 DLAmbient;
 	glm::vec3 colorSpecularSL, colorAmbientSL, colorDiffuseSL;
 	float cutOffSL, outerCutOffSL, constantSL, linearSL, quadraticSL;
-	bool activeDL, activeSL, activePL1, activePL2,kd,ks,kdMesh,ksMesh,reflectMesh,refractMesh;
+	bool activeDL, activeSL, activePL1, activePL2,kd,ks,kdMesh,ksMesh, knMesh ,reflectMesh,refractMesh;
 
 	glm::vec3 colorSpecularPL1, colorAmbientPL1, colorDiffusePL1;
 	glm::vec3 colorSpecularPL2, colorAmbientPL2, colorDiffusePL2;
@@ -62,8 +62,10 @@ public:
 	void setRefract(int active);
 	void setMeshKD(int coeficient);
 	void setMeshKS(int coeficient);
+	void setMeshKN(int coeficient);
 	int getMeshKD();
 	int getMeshKS();
+	int getMeshKN();
 
 	int getMeshPicked();
 	int getGeometryPicked();
