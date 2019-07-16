@@ -64,7 +64,7 @@ Geometry *geo;
 Mesh *mesh;
 vector<unsigned int>VBOaux;
 Camera *camera = new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
-glm::mat4 MVP, Projection, View, Model;
+glm::mat4 MVP, Projection, View, Model, ModelView;
 
 
 
@@ -549,8 +549,8 @@ bool init()
 	textureIDS->setTexture(loaderTexture.loadCubeMap(faces));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/white.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/normalD.png"));
-	textureIDS->setTexture(loaderTexture.load("assets/textures/container2.jpg"));
-	textureIDS->setTexture(loaderTexture.load("assets/textures/container2_specular.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/box.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/boxSP.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/brickwall.jpg"));
 
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dif/arm.jpg"));//6
@@ -596,6 +596,15 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2_normal.jpg"));
 
+	//36
+	textureIDS->setTexture(loaderTexture.load("assets/textures/wood.png"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/pruebanm.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/pruebadp.jpg"));
+
+	textureIDS->setTexture(loaderTexture.load("assets/textures/242-diffuse.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/242-normal.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/242-reflectiveocclusion.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/242-bump.jpg"));
 
 
 
@@ -615,9 +624,13 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
 
 	// Loads all the geometry into the GPU
 	/*
@@ -630,7 +643,7 @@ bool init()
 
 
 	meshes[3]->setMaterialType(1);
-	meshes[3]->setTextureGeometry(0, 5, 1,31,33);
+	meshes[3]->setTextureGeometry(0, 5, 5,31,33);
 	meshes[3]->setTextureCubeMap(0);
 
 
@@ -691,7 +704,7 @@ bool init()
 	meshes[10]->setTextureCubeMap(0);
 
 
-	meshes[11]->setTranslate(glm::vec3(1.5f, 1.35f, -6.0f));
+	meshes[11]->setTranslate(glm::vec3(0.0f, 1.35f, -6.0f));
 	meshes[11]->setMaterialType(3);
 	meshes[11]->setTextureGeometry(0, 6, 7,25,33);
 	meshes[11]->setTextureGeometry(2, 8, 9,26,33);
@@ -702,7 +715,7 @@ bool init()
 	meshes[11]->setTextureCubeMap(0);
 
 
-	meshes[12]->setTranslate(glm::vec3(0.0f, 1.35f, -6.0f));
+	meshes[12]->setTranslate(glm::vec3(1.5f, 1.35f, -6.0f));
 	meshes[12]->setMaterialType(3);
 	meshes[12]->setTextureGeometry(0, 6, 7,25,33);
 	meshes[12]->setTextureGeometry(2, 8, 9,26,33);
@@ -714,23 +727,48 @@ bool init()
 
 	meshes[13]->setTranslate(glm::vec3(6.0f, 1.1f, -3.0f));
 	meshes[13]->setMaterialType(1);
-	meshes[13]->setTextureGeometry(0, 34, 1, 35, 33);
+	meshes[13]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[13]->setTextureCubeMap(0);
 	meshes[13]->setKDepth(1);
 
 	meshes[14]->setTranslate(glm::vec3(6.0f, 1.1f, -5.0f));
-	meshes[14]->setRotate(glm::vec3(0.0f, 180.0f, 0.0f));
 	meshes[14]->setMaterialType(1);
-	meshes[14]->setTextureGeometry(0, 34, 1, 35, 33);
+	meshes[14]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[14]->setTextureCubeMap(0);
 	meshes[14]->setKDepth(1);
 
 	meshes[15]->setTranslate(glm::vec3(6.0f, 1.1f, -1.0f));
-	meshes[15]->setRotate(glm::vec3(0.0f, 180.0f, 0.0f));
 	meshes[15]->setMaterialType(1);
-	meshes[15]->setTextureGeometry(0, 34, 1, 35, 33);
+	meshes[15]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[15]->setTextureCubeMap(0);
 	meshes[15]->setKDepth(1);
+
+	meshes[16]->setTranslate(glm::vec3(-4.0f, 1.1f, -9.0f));
+	meshes[16]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
+	meshes[16]->setMaterialType(1);
+	meshes[16]->setTextureGeometry(0, 36, 36, 37, 38);
+	meshes[16]->setTextureCubeMap(0);
+	meshes[16]->setKDepth(1);
+
+	meshes[17]->setTranslate(glm::vec3(0.0f, 1.1f, -9.0f));
+	meshes[17]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
+	meshes[17]->setMaterialType(1);
+	meshes[17]->setTextureGeometry(0, 36, 36, 37, 38);
+	meshes[17]->setTextureCubeMap(0);
+	meshes[17]->setKDepth(1);
+
+	meshes[18]->setTranslate(glm::vec3(4.0f, 1.1f, -9.0f));
+	meshes[18]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
+	meshes[18]->setMaterialType(1);
+	meshes[18]->setTextureGeometry(0, 39, 41, 40, 42);
+	meshes[18]->setTextureCubeMap(0);
+	meshes[18]->setKDepth(1);
+
+	meshes[19]->setTranslate(glm::vec3(0.0f, 2.1f, 0.0f));
+	meshes[19]->setMaterialType(1);
+	meshes[19]->setTextureGeometry(0, 34, 34, 35, 33);
+	meshes[19]->setTextureCubeMap(0);
+	meshes[19]->setKDepth(1);
 
 	max = meshes.size();
 	for (i = 0; i < max; i++) {
@@ -814,16 +852,18 @@ void activeShader(int shaderSelect) {
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Constant", pointLights[s]->constant);
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Linear", pointLights[s]->linear);
 		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Quadratic", pointLights[s]->quadratic);
-		if (shaderSelect != 2) {
+		if (shaderSelect != 3) {
 			shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].SpecularColor", pointLights[s]->specular);
 		}
 	}
 
 
+	ModelView = View * Model;
 	shaders[shaderSelect]->setMat4("modelMatrix", Model);
 	shaders[shaderSelect]->setMat4("projectMatrix", Projection);
 	shaders[shaderSelect]->setMat4("viewMatrix", View);
-	shaders[shaderSelect]->setMat3("normalMatrix", glm::inverseTranspose(glm::mat3(Model)));
+	shaders[shaderSelect]->setMat4("modelViewMatrix", ModelView);
+	shaders[shaderSelect]->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(Model))));
 	shaders[shaderSelect]->setMat4("mvpMatrix", MVP);
 	shaders[shaderSelect]->setVec3("viewPos", camera->Position);
 

@@ -72,9 +72,31 @@ uniform samplerCube skybox;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    float height =  texture(objMaterial.depthTexture, texCoords).r;    
-    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
-    return texCoords - p;    
+    float minLayers = 8;
+    float maxLayers = 32;
+    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+    vec2  currentTexCoords = texCoords;
+    float height =  texture(objMaterial.depthTexture, currentTexCoords).r;    
+    vec2 p = viewDir.xy / viewDir.z * height_scale; 
+    vec2 deltaTexCoords = p / numLayers;
+      
+    while(currentLayerDepth < height)
+    {
+        currentTexCoords -= deltaTexCoords;
+        height = texture(objMaterial.depthTexture, currentTexCoords).r;  
+        currentLayerDepth += layerDepth;  
+    }
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+    float afterDepth  = height - currentLayerDepth;
+    float beforeDepth = texture(objMaterial.depthTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0f - weight);
+
+    return finalTexCoords;
 } 
 
 float Attenuation(float constant,float linear,float quadratic, float distance){
@@ -83,13 +105,13 @@ float Attenuation(float constant,float linear,float quadratic, float distance){
 
 float blinnPhongVal(vec3 normal, vec3 lightDir, vec3 viewDir){
     vec3 H=normalize(lightDir+viewDir);
-    return pow(max(dot(H,normal),0.0f),objMaterial.shininess);
+    return pow(clamp(dot(H,normal),0.0f,1.0f),objMaterial.shininess);
 }
 
 vec3 PointLightCon(PointLight light,vec3 normal, vec3 lightDir, vec3 viewDir,vec3 kd,vec3 ks,int i){
     vec3 Contribution;
     vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
-    float diff=max(dot(normal,lightDir),0.0f);
+    float diff=clamp(dot(normal,lightDir),0.0f,1.0f);
     vec3 diffuse=light.DifusseColor*(diff *kd);
 
     float spec=blinnPhongVal(normal,lightDir,viewDir);
@@ -103,7 +125,7 @@ vec3 PointLightCon(PointLight light,vec3 normal, vec3 lightDir, vec3 viewDir,vec
 vec3 AmbientLightCon(AmbientLight light,vec3 normal, vec3 lightDir, vec3 viewDir,vec3 kd,vec3 ks){
     vec3 Contribution;
     vec3 ambient=light.AmbientColor * objMaterial.AmbientColor;
-    float diff=max(dot(normal,lightDir),0.0f);
+    float diff=clamp(dot(normal,lightDir),0.0f,1.0f);
     vec3 diffuse=light.DifusseColor*(diff * kd);
     
     float spec=blinnPhongVal(normal,lightDir,viewDir);
@@ -116,7 +138,7 @@ vec3 SpotLightCon(SpotLight light, vec3 normal, vec3 lightDir,vec3 viewDir,vec3 
     vec3 Contribution;
     
     vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
-    float diff=max(dot(normal,lightDir),0.0f);
+    float diff=clamp(dot(normal,lightDir),0.0f,1.0f);
     vec3 diffuse=light.DifusseColor*(diff *kd);
 
     float spec=blinnPhongVal(normal,lightDir,viewDir);
@@ -137,13 +159,14 @@ void main() {
     vec2 texCoords = vTexture;
     if(objMaterial.kdepth==1){
         texCoords=ParallaxMapping(texCoords,  viewDir);
+
     }
 
 
     vec3 normal=normalize(dataIn.normal);
     if(objMaterial.kn==1){
         normal= texture(objMaterial.knTexture, texCoords).rgb;
-        normal=normalize(normal*2.0f-vec3(1.0f));
+        normal=normalize(normal*2.0f-1.0f);
     }
 
     

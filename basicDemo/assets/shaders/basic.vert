@@ -23,6 +23,7 @@ uniform vec3 DirectionAL;
 uniform vec3 viewPos;
 
 uniform mat4 modelMatrix;
+uniform mat4 modelViewMatrix;
 uniform mat4 viewMatrix;
 uniform mat3 normalMatrix;
 uniform mat4 mvpMatrix;
@@ -31,14 +32,14 @@ uniform int knActive;
 
 void main() {
 
-    vec3 aNormal=normalize(normal);
-    vec3 atang=normalize(aTangent);
-    vec3 abitang=normalize(aBitangent);
+    vec3 aNormal=normal;
+    vec3 atang=aTangent;
+    vec3 abitang=aBitangent;
     mat3 model=mat3(modelMatrix);
-    vec3 T = normalize( model * atang);
+    vec3 T = normalize(model * atang);
     vec3 N = normalize(model * aNormal);
-    T = normalize(T - dot(T, N) * N);
-    vec3 B = cross(N,T);
+    vec3 B = normalize(model*abitang);
+
     mat3 TBN=mat3(1.0f);
     if(knActive==1){
         TBN = transpose(mat3(T, B, N));

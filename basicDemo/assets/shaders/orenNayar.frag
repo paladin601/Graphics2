@@ -67,9 +67,31 @@ uniform samplerCube skybox;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    float height =  texture(objMaterial.depthTexture, texCoords).r;    
-    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
-    return texCoords - p;    
+    float minLayers = 8;
+    float maxLayers = 32;
+    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+    vec2  currentTexCoords = texCoords;
+    float height =  texture(objMaterial.depthTexture, currentTexCoords).r;    
+    vec2 p = viewDir.xy / viewDir.z * height_scale; 
+    vec2 deltaTexCoords = p / numLayers;
+      
+    while(currentLayerDepth < height)
+    {
+        currentTexCoords -= deltaTexCoords;
+        height = texture(objMaterial.depthTexture, currentTexCoords).r;  
+        currentLayerDepth += layerDepth;  
+    }
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+    float afterDepth  = height - currentLayerDepth;
+    float beforeDepth = texture(objMaterial.depthTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
 } 
 
 float Attenuation(float constant,float linear,float quadratic, float distance){
@@ -77,12 +99,12 @@ float Attenuation(float constant,float linear,float quadratic, float distance){
 }
 
 float orenNayarVal(vec3 normal, vec3 lightDir, vec3 viewDir){
-    float VdotN=max(dot(viewDir,normal),0.0f);
-    float LdotN=max(dot(lightDir,normal),0.0f);
+    float VdotN=clamp(dot(viewDir,normal),0.0f,1.0f);
+    float LdotN=clamp(dot(lightDir,normal),0.0f,1.0f);
     vec3 VprodN=viewDir-normal*VdotN;
     vec3 LprodN=lightDir-normal*LdotN;
 
-    float prodVLN=max(dot(normalize(VprodN),normalize(LprodN)),0.0f);
+    float prodVLN=clamp(dot(normalize(VprodN),normalize(LprodN)),0.0f,1.0f);
 
     float alpha=max(acos(LdotN),acos(VdotN));
     float beta=min(acos(LdotN),acos(VdotN));
@@ -96,7 +118,7 @@ vec3 PointLightCon(PointLight light,vec3 normal, vec3 lightDir, vec3 viewDir,vec
     vec3 Contribution;
     vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
 
-    float VdotN=max(dot(viewDir,normal),0.0f);
+    float VdotN=clamp(dot(viewDir,normal),0.0f,1.0f);
 
     float diff=orenNayarVal(normal,lightDir,viewDir);
     
@@ -114,7 +136,7 @@ vec3 AmbientLightCon(AmbientLight light,vec3 normal, vec3 lightDir, vec3 viewDir
 
     vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
     
-    float VdotN=max(dot(viewDir,normal),0.0f);
+    float VdotN=clamp(dot(viewDir,normal),0.0f,1.0f);
 
     float diff=orenNayarVal(normal,lightDir,viewDir);
     vec3 diffuse=VdotN*light.DifusseColor*(diff * kd);
@@ -128,7 +150,7 @@ vec3 SpotLightCon(SpotLight light, vec3 normal, vec3 lightDir,vec3 viewDir,vec3 
     
     vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
 
-    float VdotN=max(dot(viewDir,normal),0.0f);
+    float VdotN=clamp(dot(viewDir,normal),0.0f,1.0f);
 
     float diff=orenNayarVal(normal,lightDir,viewDir);
     vec3 diffuse=VdotN*light.DifusseColor*(diff *kd);

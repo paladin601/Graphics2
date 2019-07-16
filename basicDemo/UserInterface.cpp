@@ -49,7 +49,7 @@ CUserInterface::CUserInterface()
 
 
 	mUserInterface = TwNewBar("Tarea 1");
-
+	TwDefine(" 'Tarea 1' color='0 0 0' alpha=200");
 	TwDefine("'Tarea 1' refresh = '0.0001f'");
 	TwDefine("'Tarea 1' resizable = true");
 	TwDefine("'Tarea 1' fontresizable = false");
@@ -63,15 +63,17 @@ CUserInterface::CUserInterface()
 
 	TwAddVarRW(mUserInterface, "Material Mesh", DeployTwTypeMaterial, &mMaterial, "label='Selected Material' group='Mesh'");
 
-	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=12");
+	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=16");
 
-	TwAddVarRW(mUserInterface, "I Reflect Mesh", TW_TYPE_FLOAT, &iReflect, "label='Indice Reflect' group='Factor' step=0.01 min=0.5");
-	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Factor' step=0.01 min=0.1");
-	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Factor' step=0.01 min=0.1");
-	TwAddVarRW(mUserInterface, "Height Mesh", TW_TYPE_FLOAT, &heightScale, "label='Height Scale PM' group='Factor' step=0.001 min=0.001");
-	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='Factor' step=0.01");
-	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='Factor' step=0.01");
-	TwAddVarRW(mUserInterface, "factor Reflect Mesh", TW_TYPE_FLOAT, &factorReflect, "label='Factor Reflect CT' group='Factor' step=0.01 min=0.0");
+	TwAddVarRW(mUserInterface, "I Reflect Mesh", TW_TYPE_FLOAT, &iReflect, "label='Indice Reflect' group='Reflect/Refract' step=0.01 min=0.5");
+	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Reflect/Refract' step=0.01 min=0.1");
+	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Reflect/Refract' step=0.01 min=0.1");
+
+	TwAddVarRW(mUserInterface, "Height Mesh", TW_TYPE_FLOAT, &heightScale, "label='Height Scale' group='Parallax Mapping' step=0.001 min=0.001");
+
+	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='BDRF' step=0.01");
+	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='BDRF' step=0.01");
+	TwAddVarRW(mUserInterface, "factor Reflect Mesh", TW_TYPE_FLOAT, &factorReflect, "label='Factor Reflect CT' group='BDRF' step=0.01 min=0.0");
 
 	TwAddVarRW(mUserInterface, "kd Mesh", TW_TYPE_BOOLCPP, &kdMesh, "label='Diffuse texture' group='Active Mesh'");
 	TwAddVarRW(mUserInterface, "ks Mesh", TW_TYPE_BOOLCPP, &ksMesh, "label='Specular texture' group='Active Mesh'");
@@ -164,12 +166,17 @@ CUserInterface::CUserInterface()
 
 	TwDefine(" 'Tarea 1'/Mesh opened=true ");
 
+	TwDefine(" 'Tarea 1'/'Reflect/Refract' group=Factor opened=false");
+	TwDefine(" 'Tarea 1'/'Parallax Mapping' group=Factor opened=false");
+	TwDefine(" 'Tarea 1'/'BDRF' group=Factor opened=false");
+	TwDefine(" 'Tarea 1'/Factor group=Mesh opened=false");
 	TwDefine(" 'Tarea 1'/'Position Mesh' group='Transform Mesh' opened=false");
 	TwDefine(" 'Tarea 1'/'Scale Mesh'    group='Transform Mesh' opened=false");
 	TwDefine(" 'Tarea 1'/'Rotate Mesh'   group='Transform Mesh' opened=false");
 	TwDefine(" 'Tarea 1'/'Transform Mesh' group=Mesh opened=false");
 	TwDefine(" 'Tarea 1'/'Active Mesh' group=Mesh opened=false");
-	TwDefine(" 'Tarea 1'/Factor group=Mesh opened=false");
+
+	
 
 
 

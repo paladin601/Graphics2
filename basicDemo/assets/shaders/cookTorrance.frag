@@ -75,9 +75,31 @@ float PI=3.14159265f;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    float height =  texture(objMaterial.depthTexture, texCoords).r;    
-    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
-    return texCoords - p;    
+    float minLayers = 8;
+    float maxLayers = 32;
+    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+    vec2  currentTexCoords = texCoords;
+    float height =  texture(objMaterial.depthTexture, currentTexCoords).r;    
+    vec2 p = viewDir.xy / viewDir.z * height_scale; 
+    vec2 deltaTexCoords = p / numLayers;
+      
+    while(currentLayerDepth < height)
+    {
+        currentTexCoords -= deltaTexCoords;
+        height = texture(objMaterial.depthTexture, currentTexCoords).r;  
+        currentLayerDepth += layerDepth;  
+    }
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+    float afterDepth  = height - currentLayerDepth;
+    float beforeDepth = texture(objMaterial.depthTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
+ 
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
 } 
 
 float Attenuation(float constant,float linear,float quadratic, float distance){
