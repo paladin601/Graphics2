@@ -591,7 +591,7 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/personaje/dnn/hand.png"));
 	//31
 	textureIDS->setTexture(loaderTexture.load("assets/textures/brickwall_normal.jpg"));
-	textureIDS->setTexture(loaderTexture.load("assets/textures/normal_cube.jpg"));
+	textureIDS->setTexture(loaderTexture.load("assets/textures/boxNM.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2_disp.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/bricks2_normal.jpg"));
@@ -630,7 +630,8 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/esfer.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/muro.obj"));
 
 	// Loads all the geometry into the GPU
 	/*
@@ -769,6 +770,13 @@ bool init()
 	meshes[19]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[19]->setTextureCubeMap(0);
 	meshes[19]->setKDepth(1);
+
+	meshes[20]->setTranslate(glm::vec3(0.0f, 1.0f, 0.0f));
+	meshes[20]->setMaterialType(1);
+	meshes[20]->setTextureGeometry(0, 34, 34, 35, 33);
+	meshes[20]->setTextureCubeMap(0);
+	meshes[20
+	]->setKDepth(1);
 
 	max = meshes.size();
 	for (i = 0; i < max; i++) {

@@ -32,13 +32,15 @@ uniform int knActive;
 
 void main() {
 
-    vec3 aNormal=normal;
-    vec3 atang=aTangent;
-    vec3 abitang=aBitangent;
+    vec3 aNormal=normalize(normal);
+    vec3 atang=normalize(aTangent);
+    vec3 abitang=normalize(aBitangent);
     mat3 model=mat3(modelMatrix);
     vec3 T = normalize(model * atang);
     vec3 N = normalize(model * aNormal);
     vec3 B = normalize(model*abitang);
+    T =normalize(T - N * dot(N, T));
+
 
     mat3 TBN=mat3(1.0f);
     if(knActive==1){
