@@ -220,5 +220,5 @@ void main() {
     }
 
 
-    fragColor= vec4(lightContribution*refl*refr, 1.0f);    
+    fragColor= vec4(lightContribution*refl*refr,texture2D(objMaterial.kdTexture, texCoords).a);    
 }

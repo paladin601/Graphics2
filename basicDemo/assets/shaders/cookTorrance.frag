@@ -217,8 +217,7 @@ void main() {
 
 
     vec3 kd=objMaterial.DifusseColor;
-    if(texture2D(objMaterial.kdTexture, texCoords).a < 0.1)
-        discard;
+
     kd*=texture2D(objMaterial.kdTexture, texCoords).rgb;
     
     vec3 ks=objMaterial.SpecularColor;
@@ -255,5 +254,5 @@ void main() {
     }
 
 
-    fragColor= vec4(lightContribution*refl*refr, 1.0f);
+    fragColor= vec4(lightContribution*refl*refr, texture2D(objMaterial.kdTexture, texCoords).a);
 }

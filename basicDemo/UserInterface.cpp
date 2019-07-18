@@ -63,15 +63,15 @@ CUserInterface::CUserInterface()
 
 	TwAddVarRW(mUserInterface, "Material Mesh", DeployTwTypeMaterial, &mMaterial, "label='Selected Material' group='Mesh'");
 
-	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=17");
+	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=18");
 
 	TwAddVarRW(mUserInterface, "I Reflect Mesh", TW_TYPE_FLOAT, &iReflect, "label='Indice Reflect' group='Reflect/Refract' step=0.01 min=0.5");
 	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Reflect/Refract' step=0.01 min=0.1");
 	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Reflect/Refract' step=0.01 min=0.1");
 
 	TwAddVarRW(mUserInterface, "Height Mesh", TW_TYPE_FLOAT, &heightScale, "label='Height Scale' group='Parallax Mapping' step=0.001 min=0.001");
-	TwAddVarRW(mUserInterface, "Min Layers Mesh", TW_TYPE_FLOAT, &minLayer, "label='Min Layers' group='Parallax Mapping' step=0.001 min=0.001");
-	TwAddVarRW(mUserInterface, "Max Layers Mesh", TW_TYPE_FLOAT, &maxLayer, "label='Max Layers' group='Parallax Mapping' step=0.001 min=0.001");
+	TwAddVarRW(mUserInterface, "Min Layers Mesh", TW_TYPE_FLOAT, &minLayer, "label='Min Layers' group='Parallax Mapping' step=0.1 min=0.1");
+	TwAddVarRW(mUserInterface, "Max Layers Mesh", TW_TYPE_FLOAT, &maxLayer, "label='Max Layers' group='Parallax Mapping' step=0.1 min=0.1");
 
 	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='BDRF' step=0.01");
 	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='BDRF' step=0.01");

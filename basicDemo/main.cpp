@@ -271,8 +271,10 @@ void initGL()
 {
 	// Enables the z-buffer test
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_BLEND);
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// Sets the ViewPort
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Sets the clear color
@@ -609,6 +611,10 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/242-normal.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/242-reflectiveocclusion.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/242-bump.jpg"));
+	//43
+	textureIDS->setTexture(loaderTexture.load("assets/textures/window.png"));
+
+
 
 
 
@@ -635,6 +641,8 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 
 	// Loads all the geometry into the GPU
@@ -769,18 +777,35 @@ bool init()
 	meshes[18]->setTextureCubeMap(0);
 	meshes[18]->setKDepth(1);
 
-	meshes[19]->setTranslate(glm::vec3(0.0f, 2.1f, 0.0f));
+	meshes[19]->setTranslate(glm::vec3(2.0f, 1.1f, 0.0f));
 	meshes[19]->setMaterialType(1);
 	meshes[19]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[19]->setTextureCubeMap(0);
 	meshes[19]->setKDepth(1);
 
-	meshes[20]->setTranslate(glm::vec3(0.0f, 1.1f, 0.0f));
+	meshes[20]->setTranslate(glm::vec3(0.0f, 1.1f, -2.0f));
+	meshes[20]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
 	meshes[20]->setMaterialType(1);
-	meshes[20]->setTextureGeometry(0, 34, 34, 35, 33);
+	meshes[20]->setTextureGeometry(0, 43, 43, 35, 33);
 	meshes[20]->setTextureCubeMap(0);
-	meshes[20
-	]->setKDepth(1);
+	meshes[20]->setKDepth(0);
+	meshes[20]->setKN(0);
+
+	meshes[21]->setTranslate(glm::vec3(0.0f, 1.1f, 0.0f));
+	meshes[21]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
+	meshes[21]->setMaterialType(1);
+	meshes[21]->setTextureGeometry(0, 43, 43, 35, 33);
+	meshes[21]->setTextureCubeMap(0);
+	meshes[21]->setKDepth(0);
+	meshes[21]->setKN(0);
+
+	meshes[22]->setTranslate(glm::vec3(0.0f, 1.1f, 2.0f));
+	meshes[22]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
+	meshes[22]->setMaterialType(1);
+	meshes[22]->setTextureGeometry(0, 43, 43, 35, 33);
+	meshes[22]->setTextureCubeMap(0);
+	meshes[22]->setKDepth(0);
+	meshes[22]->setKN(0);
 
 	max = meshes.size();
 	for (i = 0; i < max; i++) {
@@ -925,7 +950,6 @@ void render()
 	Projection = glm::perspective(glm::radians(camera->Zoom), aspectRatio, 0.1f, 100.0f);
 	View = camera->GetViewMatrix();
 
-	glEnable(GL_FRAMEBUFFER_SRGB);
 	for (i = 0; i < max; i++) {
 		cont = meshes[i]->getGeometryLength();
 		materialType = meshes[i]->getMaterialType();
@@ -988,7 +1012,6 @@ void render()
 			}
 		}
 	}
-	glDisable(GL_FRAMEBUFFER_SRGB);
 	TwDraw();
 
 	glfwSwapBuffers(window);
