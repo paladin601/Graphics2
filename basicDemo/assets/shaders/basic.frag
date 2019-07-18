@@ -56,6 +56,8 @@ struct Material{
     float IReflect;
     float IORin;
     float IORout;
+    float minLayer;
+    float maxLayer;
     int kreflect;
     int krefract;
     int kn;
@@ -72,9 +74,7 @@ uniform samplerCube skybox;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    float minLayers = 8;
-    float maxLayers = 32;
-    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float numLayers = mix(objMaterial.maxLayer, objMaterial.minLayer, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
     float layerDepth = 1.0 / numLayers;
     float currentLayerDepth = 0.0;
     vec2  currentTexCoords = texCoords;

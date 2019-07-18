@@ -2,6 +2,8 @@
 
 Mesh::Mesh()
 {
+	minLayer = 8;
+	maxLayer = 32;
 	heightScale = 0.06f;
 	shininess = 128.0f;
 	roughness = 0.2f;
@@ -134,6 +136,26 @@ float Mesh::getRoughness()
 float Mesh::getHeightScale()
 {
 	return heightScale;
+}
+
+float Mesh::getMinLayer()
+{
+	return minLayer;
+}
+
+float Mesh::getMaxLayer()
+{
+	return maxLayer;
+}
+
+void Mesh::setMinLayer(float value)
+{
+	minLayer = value;
+}
+
+void Mesh::setMaxLayer(float value)
+{
+	maxLayer = value;
 }
 
 void Mesh::setHeightScale(float value)

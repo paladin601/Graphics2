@@ -57,6 +57,8 @@ struct Material{
     float IORin;
     float IORout;
     float IReflect;
+    float minLayer;
+    float maxLayer;
     int kreflect;
     int krefract;
     int kn;
@@ -75,9 +77,7 @@ float PI=3.14159265f;
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
-    float minLayers = 8;
-    float maxLayers = 32;
-    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+    float numLayers = mix(objMaterial.maxLayer, objMaterial.minLayer, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
     float layerDepth = 1.0 / numLayers;
     float currentLayerDepth = 0.0;
     vec2  currentTexCoords = texCoords;
@@ -217,15 +217,11 @@ void main() {
 
 
     vec3 kd=objMaterial.DifusseColor;
-
     if(texture2D(objMaterial.kdTexture, texCoords).a < 0.1)
         discard;
     kd*=texture2D(objMaterial.kdTexture, texCoords).rgb;
     
     vec3 ks=objMaterial.SpecularColor;
-    
-    if(texture2D(objMaterial.ksTexture, texCoords).a < 0.1)
-        discard;
     ks*=texture2D(objMaterial.ksTexture, texCoords).rgb;
 
 

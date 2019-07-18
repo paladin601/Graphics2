@@ -386,6 +386,8 @@ void updateDataMesh() {
 	meshes[meshPicked]->setRoughness(userInterface->getRoughnessGeometry());
 	meshes[meshPicked]->setKDepth(userInterface->getMeshKDepth());
 	meshes[meshPicked]->setHeightScale(userInterface->getHeightScale());
+	meshes[meshPicked]->setMinLayer(userInterface->getMinLayer());
+	meshes[meshPicked]->setMaxLayer(userInterface->getMaxLayer());
 
 	geo = meshes[meshPicked]->getGeometry(geometryPicked);
 	geo->setTranslate(userInterface->getGeometryTranslate());
@@ -431,6 +433,8 @@ void updateDataInterface() {
 	userInterface->setRoughnessGeometry(meshes[meshPicked]->getRoughness());
 	userInterface->setMeshKDepth(meshes[meshPicked]->getKDepth());
 	userInterface->setHeightScale(meshes[meshPicked]->getHeightScale());
+	userInterface->setMinLayer(meshes[meshPicked]->getMinLayer());
+	userInterface->setMaxLayer(meshes[meshPicked]->getMaxLayer());
 
 	updateGeometrydata();
 }
@@ -630,8 +634,8 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/esfer.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/muro.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 
 	// Loads all the geometry into the GPU
 	/*
@@ -771,7 +775,7 @@ bool init()
 	meshes[19]->setTextureCubeMap(0);
 	meshes[19]->setKDepth(1);
 
-	meshes[20]->setTranslate(glm::vec3(0.0f, 1.0f, 0.0f));
+	meshes[20]->setTranslate(glm::vec3(0.0f, 1.1f, 0.0f));
 	meshes[20]->setMaterialType(1);
 	meshes[20]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[20]->setTextureCubeMap(0);
@@ -820,6 +824,8 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setFloat("objMaterial.IReflect", mesh->getIReflect());
 	shaders[shaderSelect]->setFloat("factReflec", mesh->getFactorReflect());
 	shaders[shaderSelect]->setFloat("height_scale", mesh->getHeightScale());
+	shaders[shaderSelect]->setFloat("objMaterial.minLayer", mesh->getMinLayer());
+	shaders[shaderSelect]->setFloat("objMaterial.maxLayer", mesh->getMaxLayer());
 
 
 	

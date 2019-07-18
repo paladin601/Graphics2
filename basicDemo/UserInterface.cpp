@@ -23,7 +23,7 @@ CUserInterface::CUserInterface()
 	colorAmbientDL = glm::vec3(0.495f, 0.495f, 0.495f);
 	colorDiffuseDL = glm::vec3(0.5f, 0.5f, 0.5f);
 	colorSpecularDL = glm::vec3(1.0f, 1.0f, 1.0f);
-	DLAmbient = glm::vec3(3.0f, -4.0f, -2.0f);
+	DLAmbient = glm::vec3(0.0f, 0.0f, -5.0f);
 	activeDL = true;
 	activeSL = false;
 	activePL1 = false;
@@ -63,13 +63,15 @@ CUserInterface::CUserInterface()
 
 	TwAddVarRW(mUserInterface, "Material Mesh", DeployTwTypeMaterial, &mMaterial, "label='Selected Material' group='Mesh'");
 
-	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=16");
+	TwAddVarRW(mUserInterface, "Select Mesh", TW_TYPE_INT8, &meshPicked, "label='Selected Mesh' group='Mesh' min=0 max=17");
 
 	TwAddVarRW(mUserInterface, "I Reflect Mesh", TW_TYPE_FLOAT, &iReflect, "label='Indice Reflect' group='Reflect/Refract' step=0.01 min=0.5");
 	TwAddVarRW(mUserInterface, "IORin X Mesh", TW_TYPE_FLOAT, &IORin, "label='IOR In' group='Reflect/Refract' step=0.01 min=0.1");
 	TwAddVarRW(mUserInterface, "IORout Mesh", TW_TYPE_FLOAT, &IORout, "label='IOR Out' group='Reflect/Refract' step=0.01 min=0.1");
 
 	TwAddVarRW(mUserInterface, "Height Mesh", TW_TYPE_FLOAT, &heightScale, "label='Height Scale' group='Parallax Mapping' step=0.001 min=0.001");
+	TwAddVarRW(mUserInterface, "Min Layers Mesh", TW_TYPE_FLOAT, &minLayer, "label='Min Layers' group='Parallax Mapping' step=0.001 min=0.001");
+	TwAddVarRW(mUserInterface, "Max Layers Mesh", TW_TYPE_FLOAT, &maxLayer, "label='Max Layers' group='Parallax Mapping' step=0.001 min=0.001");
 
 	TwAddVarRW(mUserInterface, "Shininess", TW_TYPE_FLOAT, &shininess, "label='Shininess' group='BDRF' step=0.01");
 	TwAddVarRW(mUserInterface, "Roughness", TW_TYPE_FLOAT, &roughness, "label='Roughness' group='BDRF' step=0.01");
@@ -249,6 +251,26 @@ void CUserInterface::setFactorReflect(float value)
 float CUserInterface::getFactorReflect()
 {
 	return factorReflect;
+}
+
+void CUserInterface::setMinLayer(float value)
+{
+	minLayer = value;
+}
+
+float CUserInterface::getMinLayer()
+{
+	return minLayer;
+}
+
+void CUserInterface::setMaxLayer(float value)
+{
+	maxLayer = value;
+}
+
+float CUserInterface::getMaxLayer()
+{
+	return maxLayer;
 }
 
 int CUserInterface::getMeshMaterialPicked()

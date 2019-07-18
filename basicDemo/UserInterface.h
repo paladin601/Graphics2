@@ -22,22 +22,23 @@ private:
 	int geometryLength;
 	string nameGeometry;
 	float IORout, IORin;
+	float shininess, roughness ,iReflect,factorReflect, heightScale;
+	float cutOffSL, outerCutOffSL, constantSL, linearSL, quadraticSL;
+	float constantPL1, linearPL1, quadraticPL1;
+	float constantPL2, linearPL2, quadraticPL2;
+	float maxLayer, minLayer;
 	glm::vec3 positionMesh, scaleMesh, rotateMesh;
 	glm::vec3 positionGeometry, scaleGeometry, rotateGeometry;
 	glm::vec3 colorSpecularGeometry, colorAmbientGeometry, colorDiffuseGeometry;
-	float shininess, roughness ,iReflect,factorReflect, heightScale;
 	DeployTypeMaterial mMaterial;
 	glm::vec3 colorSpecularDL, colorAmbientDL, colorDiffuseDL;
 	glm::vec3 DLAmbient;
 	glm::vec3 colorSpecularSL, colorAmbientSL, colorDiffuseSL;
-	float cutOffSL, outerCutOffSL, constantSL, linearSL, quadraticSL;
 	bool activeDL, activeSL, activePL1, activePL2,kdMesh,ksMesh, knMesh, kdepth ,reflectMesh,refractMesh;
 
 	glm::vec3 colorSpecularPL1, colorAmbientPL1, colorDiffusePL1;
 	glm::vec3 colorSpecularPL2, colorAmbientPL2, colorDiffusePL2;
 	glm::vec3 positionPL1, positionPL2;
-	float constantPL1, linearPL1, quadraticPL1;
-	float constantPL2, linearPL2, quadraticPL2;
 
 	CUserInterface();
 
@@ -54,6 +55,11 @@ public:
 	float getIReflect();
 	void setFactorReflect(float value);
 	float getFactorReflect();
+
+	void setMinLayer(float value);
+	float getMinLayer();
+	void setMaxLayer(float value);
+	float getMaxLayer();
 
 
 

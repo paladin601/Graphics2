@@ -22,6 +22,7 @@ private:
 	int materialType;
 	int n;
 	float IORin, IORout,IReflect, FactorReflect,shininess,roughness, heightScale;
+	float maxLayer, minLayer;
 	int kd, ks, kn, kdepth,reflect, refract;
 	int textureCubeMap;
 public:
@@ -47,6 +48,12 @@ public:
 	float getShininess();
 	float getRoughness();
 	float getHeightScale();
+	float getMinLayer();
+	float getMaxLayer();
+
+
+	void setMinLayer(float value);
+	void setMaxLayer(float value);
 
 
 	void setHeightScale(float value);
