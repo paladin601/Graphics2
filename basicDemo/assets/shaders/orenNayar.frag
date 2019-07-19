@@ -9,6 +9,7 @@ in Data{
     vec3 directionSP;
     vec3 directionAL;
     vec3 viewPos;
+    vec4 vertexPosLight;
 }dataIn;
 in vec2 vTexture;
 
@@ -66,6 +67,35 @@ struct Material{
 uniform Material objMaterial;
 uniform float height_scale=0.1f;
 uniform samplerCube skybox;
+uniform sampler2D shadowMap;
+
+
+float ShadowCalculation(vec4 fragPosLightSpace , vec3 normal ,vec3 lightDir)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z;
+
+    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);  
+
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    if(currentDepth > 1.0)
+        shadow = 0.0;
+        
+    return shadow;
+}
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
@@ -140,8 +170,8 @@ vec3 AmbientLightCon(AmbientLight light,vec3 normal, vec3 lightDir, vec3 viewDir
 
     float diff=orenNayarVal(normal,lightDir,viewDir);
     vec3 diffuse=VdotN*light.DifusseColor*(diff * kd);
-
-    Contribution=(ambient+diffuse);
+    float shadow = ShadowCalculation(dataIn.vertexPosLight,normal,lightDir);
+    Contribution=(ambient+(1.0 - shadow)*diffuse);
     return Contribution;
 }
 

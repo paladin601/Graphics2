@@ -1,14 +1,13 @@
 #include <glad/glad.h> // Glad has to be include before glfw
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <iostream>
-#include <stb_image.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm\gtc\matrix_inverse.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 #include <glm\gtx\euler_angles.hpp>
 #include <glm\gtx\matrix_cross_product.hpp>
+#include <iostream>
 
 
 #include "ObjLoader.h"
@@ -27,6 +26,9 @@ using namespace std;
 
 unsigned int windowWidth = 800;
 unsigned int windowHeight = 800;
+unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+unsigned int depthMapFBO;
+unsigned int depthMap;
 
 float aspectRatio = float(windowWidth / windowHeight);
 const char *windowTitle = "CCG Tarea";
@@ -65,6 +67,8 @@ Mesh *mesh;
 vector<unsigned int>VBOaux;
 Camera *camera = new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
 glm::mat4 MVP, Projection, View, Model, ModelView;
+glm::mat4 lightProjection, lightView;
+glm::mat4 lightSpaceMatrix;
 
 
 
@@ -184,6 +188,8 @@ void processKeyboardInput(GLFWwindow *window)
 		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 		shaders.push_back(shader);
+		shader = new Shader("assets/shaders/depthShader.vert", "assets/shaders/depthShader.frag");
+		shaders.push_back(shader);
 
 	}
 
@@ -274,7 +280,7 @@ void initGL()
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+
 	// Sets the ViewPort
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Sets the clear color
@@ -357,17 +363,10 @@ void buildGeometry()
  * @returns{unsigned int} GPU texture index
  * */
 
-
-
-
- //textureIDS->setTexture(cubeID);
- //textureIDS->setTexture(id);
-
-
-/**
- * Initialize everything
- * @returns{bool} true if everything goes ok
- * */
+ /**
+  * Initialize everything
+  * @returns{bool} true if everything goes ok
+  * */
 
 void updateDataMesh() {
 
@@ -400,8 +399,6 @@ void updateDataMesh() {
 	geo->material.diffuse = userInterface->getColorDiffuseGeometry();
 }
 
-
-
 void updateGeometrydata() {
 	geo = meshes[meshPicked]->getGeometry(geometryPicked);
 	userInterface->setGeometryName(geo->getName());
@@ -413,7 +410,6 @@ void updateGeometrydata() {
 	userInterface->setColorSpecularGeometry(geo->material.specular);
 }
 
-
 void updateDataInterface() {
 	userInterface->setGeometryPicked(0);
 	userInterface->setGeometryLength(meshes[meshPicked]->getGeometryLength());
@@ -423,7 +419,7 @@ void updateDataInterface() {
 	userInterface->setMeshRotate(meshes[meshPicked]->getRotate());
 	userInterface->setIORin(meshes[meshPicked]->getIORin());
 	userInterface->setIORout(meshes[meshPicked]->getIORout());
-	
+
 	userInterface->setMeshKD(meshes[meshPicked]->getKD());
 	userInterface->setMeshKS(meshes[meshPicked]->getKS());
 	userInterface->setMeshKN(meshes[meshPicked]->getKN());
@@ -514,6 +510,27 @@ void updateUserInterface()
 
 }
 
+void createBufferShadowMapping() {
+
+	glGenFramebuffers(1, &depthMapFBO);
+	// create depth texture
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 bool init()
 {
 	// Initialize the window, and the glad components
@@ -522,6 +539,7 @@ bool init()
 
 	// Initialize the opengl context
 	initGL();
+	createBufferShadowMapping();
 	Ambient = new DirectionalLight();
 	spotLight = new SpotLight();
 	PointLight *aux1 = new PointLight();
@@ -539,6 +557,8 @@ bool init()
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/orenNayar.frag");
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
+	shaders.push_back(shader);
+	shader = new Shader("assets/shaders/depthShader.vert", "assets/shaders/depthShader.frag");
 	shaders.push_back(shader);
 
 
@@ -656,32 +676,35 @@ bool init()
 
 
 	meshes[3]->setMaterialType(1);
-	meshes[3]->setTextureGeometry(0, 5, 5,31,33);
+	meshes[3]->setTextureGeometry(0, 5, 5, 31, 33);
 	meshes[3]->setTextureCubeMap(0);
+	meshes[3]->setKD(0);
+	meshes[3]->setKS(0);
+	meshes[3]->setKN(0);
 
 
 
 	meshes[4]->setMaterialType(1);
 	meshes[4]->setTranslate(glm::vec3(-3.0f, 0.61f, 0.0f));
-	meshes[4]->setTextureGeometry(0, 3, 4,32,33);
+	meshes[4]->setTextureGeometry(0, 3, 4, 32, 33);
 	meshes[4]->setTextureCubeMap(0);
 
 
 
 	meshes[5]->setMaterialType(2);
 	meshes[5]->setTranslate(glm::vec3(-4.5f, 0.61f, 0.0f));
-	meshes[5]->setTextureGeometry(0, 3, 4,32,33);
+	meshes[5]->setTextureGeometry(0, 3, 4, 32, 33);
 	meshes[5]->setTextureCubeMap(0);
 
 
 	meshes[6]->setTranslate(glm::vec3(-6.0f, 1.35f, 0.0f));
 	meshes[6]->setMaterialType(3);
-	meshes[6]->setTextureGeometry(0, 6, 7,25,33);
-	meshes[6]->setTextureGeometry(2, 8, 9,26,33);
-	meshes[6]->setTextureGeometry(3, 10, 11,27,33);
-	meshes[6]->setTextureGeometry(4, 12, 13,28,33);
-	meshes[6]->setTextureGeometry(5, 14, 15,29,33);
-	meshes[6]->setTextureGeometry(6, 16, 17,30,33);
+	meshes[6]->setTextureGeometry(0, 6, 7, 25, 33);
+	meshes[6]->setTextureGeometry(2, 8, 9, 26, 33);
+	meshes[6]->setTextureGeometry(3, 10, 11, 27, 33);
+	meshes[6]->setTextureGeometry(4, 12, 13, 28, 33);
+	meshes[6]->setTextureGeometry(5, 14, 15, 29, 33);
+	meshes[6]->setTextureGeometry(6, 16, 17, 30, 33);
 	meshes[6]->setTextureCubeMap(0);
 
 
@@ -689,53 +712,53 @@ bool init()
 	meshes[7]->setTranslate(glm::vec3(3.0f, 0.41f, -3.0f));
 	meshes[7]->setMaterialType(1);
 	meshes[7]->setKN(0);
-	meshes[7]->setTextureGeometry(0, 18, 18,32,33);
-	meshes[7]->setTextureGeometry(1, 19, 19,32,33);
+	meshes[7]->setTextureGeometry(0, 18, 18, 32, 33);
+	meshes[7]->setTextureGeometry(1, 19, 19, 32, 33);
 	meshes[7]->setTextureCubeMap(0);
 
 
 	meshes[8]->setTranslate(glm::vec3(4.0f, 0.55f, -3.0f));
 	meshes[8]->setMaterialType(2);
 	meshes[8]->setKN(0);
-	meshes[8]->setTextureGeometry(0, 20, 20,32,33);
-	meshes[8]->setTextureGeometry(1, 21, 21,32,33);
-	meshes[8]->setTextureGeometry(2, 22, 22,32,33);
-	meshes[8]->setTextureGeometry(3, 22, 22,32,33);
+	meshes[8]->setTextureGeometry(0, 20, 20, 32, 33);
+	meshes[8]->setTextureGeometry(1, 21, 21, 32, 33);
+	meshes[8]->setTextureGeometry(2, 22, 22, 32, 33);
+	meshes[8]->setTextureGeometry(3, 22, 22, 32, 33);
 	meshes[8]->setTextureCubeMap(0);
 
 	meshes[9]->setTranslate(glm::vec3(5.0f, 0.27f, -3.0f));
 	meshes[9]->setMaterialType(3);
 	meshes[9]->setKN(0);
-	meshes[9]->setTextureGeometry(0, 24, 24,32,33);
-	meshes[9]->setTextureGeometry(1, 23, 23,32,33);
-	meshes[9]->setTextureGeometry(2, 24, 24,32,33);
+	meshes[9]->setTextureGeometry(0, 24, 24, 32, 33);
+	meshes[9]->setTextureGeometry(1, 23, 23, 32, 33);
+	meshes[9]->setTextureGeometry(2, 24, 24, 32, 33);
 	meshes[9]->setTextureCubeMap(0);
 
 	meshes[10]->setTranslate(glm::vec3(-1.5f, 0.61f, -6.0f));
-	meshes[10]->setTextureGeometry(0, 3, 4,32,33);
+	meshes[10]->setTextureGeometry(0, 3, 4, 32, 33);
 	meshes[10]->setMaterialType(3);
 	meshes[10]->setTextureCubeMap(0);
 
 
 	meshes[11]->setTranslate(glm::vec3(0.0f, 1.35f, -6.0f));
 	meshes[11]->setMaterialType(3);
-	meshes[11]->setTextureGeometry(0, 6, 7,25,33);
-	meshes[11]->setTextureGeometry(2, 8, 9,26,33);
-	meshes[11]->setTextureGeometry(3, 10, 11,27,33);
-	meshes[11]->setTextureGeometry(4, 12, 13,28,33);
-	meshes[11]->setTextureGeometry(5, 14, 15,29,33);
-	meshes[11]->setTextureGeometry(6, 16, 17,30,33);
+	meshes[11]->setTextureGeometry(0, 6, 7, 25, 33);
+	meshes[11]->setTextureGeometry(2, 8, 9, 26, 33);
+	meshes[11]->setTextureGeometry(3, 10, 11, 27, 33);
+	meshes[11]->setTextureGeometry(4, 12, 13, 28, 33);
+	meshes[11]->setTextureGeometry(5, 14, 15, 29, 33);
+	meshes[11]->setTextureGeometry(6, 16, 17, 30, 33);
 	meshes[11]->setTextureCubeMap(0);
 
 
 	meshes[12]->setTranslate(glm::vec3(1.5f, 1.35f, -6.0f));
 	meshes[12]->setMaterialType(3);
-	meshes[12]->setTextureGeometry(0, 6, 7,25,33);
-	meshes[12]->setTextureGeometry(2, 8, 9,26,33);
-	meshes[12]->setTextureGeometry(3, 10, 11,27,33);
-	meshes[12]->setTextureGeometry(4, 12, 13,28,33);
-	meshes[12]->setTextureGeometry(5, 14, 15,29,33);
-	meshes[12]->setTextureGeometry(6, 16, 17,30,33);
+	meshes[12]->setTextureGeometry(0, 6, 7, 25, 33);
+	meshes[12]->setTextureGeometry(2, 8, 9, 26, 33);
+	meshes[12]->setTextureGeometry(3, 10, 11, 27, 33);
+	meshes[12]->setTextureGeometry(4, 12, 13, 28, 33);
+	meshes[12]->setTextureGeometry(5, 14, 15, 29, 33);
+	meshes[12]->setTextureGeometry(6, 16, 17, 30, 33);
 	meshes[12]->setTextureCubeMap(0);
 
 	meshes[13]->setTranslate(glm::vec3(6.0f, 1.1f, -3.0f));
@@ -821,7 +844,7 @@ bool init()
 
 
 void activeShader(int shaderSelect) {
-	int kn,kdepth;
+	int kn, kdepth;
 	kn = mesh->getKN();
 	kdepth = mesh->getKDepth();
 
@@ -834,7 +857,7 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setVec3("DirectionSP", camera->Front);
 	shaders[shaderSelect]->setVec3("DirectionAL", Ambient->direction);
 	shaders[shaderSelect]->setVec3("viewPos", camera->Position);
-	shaders[shaderSelect]->setInt("knActive", (kn==1||kdepth==1)?1:0);
+	shaders[shaderSelect]->setInt("knActive", (kn == 1 || kdepth == 1) ? 1 : 0);
 
 
 
@@ -853,8 +876,8 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setFloat("objMaterial.maxLayer", mesh->getMaxLayer());
 
 
-	
-	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (mesh->getKD()==1) ? 1:4 );
+
+	shaders[shaderSelect]->setInt("objMaterial.kdTexture", (mesh->getKD() == 1) ? 1 : 4);
 	shaders[shaderSelect]->setFloat("objMaterial.IORin", mesh->getIORin());
 	shaders[shaderSelect]->setFloat("objMaterial.IORout", mesh->getIORout());
 	shaders[shaderSelect]->setInt("objMaterial.kreflect", mesh->getReflect());
@@ -862,14 +885,15 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setInt("objMaterial.knTexture", 3);
 	shaders[shaderSelect]->setInt("objMaterial.kn", kn);
 	shaders[shaderSelect]->setInt("objMaterial.kdepth", kdepth);
-	shaders[shaderSelect]->setInt("objMaterial.depthTexture",  5);
+	shaders[shaderSelect]->setInt("objMaterial.depthTexture", 5);
+	shaders[shaderSelect]->setInt("shadowMap", 6);
 
 
 	if (shaderSelect != 3) {//3 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", mesh->getShininess());
 
-		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (mesh->getKS()==1)?2:4 );
+		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (mesh->getKS() == 1) ? 2 : 4);
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);
 		shaders[shaderSelect]->setVec3("spotLight.SpecularColor", spotLight->specular);
 	}
@@ -904,7 +928,7 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setMat4("modelViewMatrix", ModelView);
 	shaders[shaderSelect]->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(Model))));
 	shaders[shaderSelect]->setMat4("mvpMatrix", MVP);
-	shaders[shaderSelect]->setVec3("viewPos", camera->Position);
+	shaders[shaderSelect]->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 
 }
@@ -923,8 +947,11 @@ void activeShader(int shaderSelect) {
 void activeTexture() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(mesh->getTextureCubeMap()));
+
+
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
+
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
 
@@ -936,6 +963,9 @@ void activeTexture() {
 
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKDepth()));//depth texture
+
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, depthMap);//depth map
 }
 
 void render()
@@ -999,6 +1029,7 @@ void render()
 				glBindVertexArray(0);
 				// Swap the buffer
 				glDepthFunc(GL_LESS);
+
 			}
 			else {
 				if (materialType != -1) {
@@ -1018,6 +1049,68 @@ void render()
 
 }
 
+void renderDepth() {
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	float near_plane = 0.01f, far_plane = 25.f;
+	lightProjection = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
+	lightView = glm::lookAt(Ambient->direction*-1.f, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	lightSpaceMatrix = lightProjection * lightView;
+	shaders[5]->use();
+	shaders[5]->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	for (i = 3; i < max; i++) {
+		cont = meshes[i]->getGeometryLength();
+		materialType = meshes[i]->getMaterialType();
+		mesh = meshes[i];
+		for (n = 0; n < cont; n++) {
+			geo = mesh->getGeometry(n);
+			Model = mesh->getMeshMatrix()* geo->getGeometryMatrix();
+
+			// Binds the vertex array to be drawn
+			shaders[5]->setInt("kd", (mesh->getKD() == 1) ? 1 : 4);
+
+			shaders[5]->setMat4("modelMatrix", Model);
+
+			glBindVertexArray(geo->getVAO());
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(mesh->getTextureCubeMap()));
+
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
+
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
+
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureNM()));
+
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));//disable specular and diffuse texture
+
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKDepth()));//depth texture
+			// Renders the triangle gemotry
+			glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
+			glBindVertexArray(0);
+
+
+		}
+	}
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// reset viewport
+	glViewport(0, 0, windowWidth, windowHeight);
+
+}
+
 /**
  * App main loop
  * */
@@ -1032,8 +1125,9 @@ void update()
 		lastFrame = currentFrame;
 		// Checks for keyboard inputs
 		processKeyboardInput(window);
-
 		updateUserInterface();
+
+		renderDepth();
 
 		// Renders everything
 		render();
@@ -1092,9 +1186,9 @@ int main(int argc, char const *argv[])
 		}
 		meshes[n]->~Mesh();
 	}
+
 	// Stops the glfw program
 	glfwTerminate();
-
 	delete userInterface;
 	delete shader;
 	delete Ambient;

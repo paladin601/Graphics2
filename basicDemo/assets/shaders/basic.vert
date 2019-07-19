@@ -14,6 +14,7 @@ out Data{
     vec3 directionSP;
     vec3 directionAL;
     vec3 viewPos;
+    vec4 vertexPosLight;
 }dataOut;
 
 uniform vec3 PositionPL[2];
@@ -29,6 +30,7 @@ uniform mat3 normalMatrix;
 uniform mat4 mvpMatrix;
 out vec2 vTexture;
 uniform int knActive;
+uniform mat4 lightSpaceMatrix;
 
 void main() {
 
@@ -38,17 +40,19 @@ void main() {
     mat3 model=mat3(modelMatrix);
     vec3 T = normalize(model * atang);
     vec3 N = normalize(model * aNormal);
-    vec3 B = normalize(model*abitang);
     T =normalize(T - N * dot(N, T));
-
+    //vec3 B = normalize(model*abitang);
+    vec3 B = normalize(cross(T,N));
+    
 
     mat3 TBN=mat3(1.0f);
     if(knActive==1){
         TBN = transpose(mat3(T, B, N));
     }
-
+    vec3 vertex=vec3(modelMatrix*vec4(position,1.f));
     dataOut.normal= normalMatrix*normal;
-    dataOut.vertexPos= TBN*vec3(modelMatrix*vec4(position,1.f));
+    dataOut.vertexPosLight=lightSpaceMatrix* vec4(vertex,1.0f);
+    dataOut.vertexPos= TBN*vertex;
     dataOut.positionPL[0]= TBN*PositionPL[0];
     dataOut.positionPL[1]= TBN*PositionPL[1];
     dataOut.positionSP= TBN*PositionSP;
