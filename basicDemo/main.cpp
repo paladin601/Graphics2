@@ -26,7 +26,7 @@ using namespace std;
 
 unsigned int windowWidth = 800;
 unsigned int windowHeight = 800;
-unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
 unsigned int depthMapFBO;
 unsigned int depthMap;
 
@@ -660,7 +660,7 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/uvSphere.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));

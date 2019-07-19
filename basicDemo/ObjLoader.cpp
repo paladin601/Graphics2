@@ -32,7 +32,7 @@ Mesh * ObjLoader::load(string path)
 	int num = 0;
 	glm::vec3 pos1, pos2, pos3, tangent, bitangent, edge1, edge2, nl1,nl2,nl3;
 	glm::vec2 uv1, uv2, uv3, deltaUV1, deltaUV2;
-	int i,j,w;
+	int i,j;
 	bool a = false;
 	file.open(path, std::ios::in);
 	while (!file.eof()) {
@@ -134,11 +134,11 @@ Mesh * ObjLoader::load(string path)
 			geo->setUV(uv3);
 			
 
-			/*
-			*/
 			geo->setNormal(nl1);
 			geo->setNormal(nl2);
 			geo->setNormal(nl3);
+			/*
+			*/
 			
 
 
@@ -162,11 +162,11 @@ Mesh * ObjLoader::load(string path)
 			geo->setBitangent(bitangent);
 			geo->setBitangent(bitangent);
 
-
 			/*
 			normalProm[vertexIndices[i]] = nl1;
 			normalProm[vertexIndices[i+1]] = nl2;
 			normalProm[vertexIndices[i+2]] = nl3;
+			*/
 
 
 			tangentProm[vertexIndices[i]] = tangentProm[vertexIndices[i]]+tangent;
@@ -180,15 +180,15 @@ Mesh * ObjLoader::load(string path)
 			bitangentCont[vertexIndices[i]] += glm::vec3(1.0f);
 			bitangentCont[vertexIndices[i + 1]] += glm::vec3(1.0f);
 			bitangentCont[vertexIndices[i + 2]] += glm::vec3(1.0f);
+			/*
 			*/
 			
 		}
 		contVert += max;
 		/*
-		*/
 		mesh->setGeometry(geo);
+		*/
 	}
-	/*
 	contVert = 0;
 	contEnd = 0;
 	for (j = 0; j < num; j++) {
@@ -200,12 +200,15 @@ Mesh * ObjLoader::load(string path)
 			geo->setTangent(tangent);
 			bitangent = bitangentProm[vertexIndices[i]] / bitangentCont[vertexIndices[i]];
 			geo->setBitangent(bitangent);
+			/*
 			normal= normalProm[vertexIndices[i]] / bitangentCont[vertexIndices[i]];
 			geo->setNormal(normal);
+			*/
 		}
 		contVert += max;
 		mesh->setGeometry(geo);
 	}
+	/*
 	*/
 	
 	
