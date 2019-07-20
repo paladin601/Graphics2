@@ -51,7 +51,6 @@ bool mouseOn = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 bool quad = false;
-float near_plane = 0.01f, far_plane = 25.f;
 
 
 GLFWwindow *window;
@@ -70,8 +69,10 @@ Mesh *mesh;
 vector<unsigned int>VBOaux;
 Camera *camera = new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
 glm::mat4 MVP, Projection, View, Model, ModelView;
-glm::mat4 lightProjection, lightView;
+glm::mat4 lightView;
 glm::mat4 lightSpaceMatrix;
+float near_plane = 0.01f, far_plane = 25.f;
+glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 
 
 
@@ -1085,8 +1086,7 @@ void renderDepth() {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	lightProjection = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
-	lightView = glm::lookAt(Ambient->direction*-1.f, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	lightView = glm::lookAt(Ambient->direction*-2.f, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
 	shaders[5]->use();
 	shaders[5]->setMat4("lightSpaceMatrix", lightSpaceMatrix);
