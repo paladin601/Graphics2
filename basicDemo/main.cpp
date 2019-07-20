@@ -571,7 +571,6 @@ bool init()
 
 	// Initialize the opengl context
 	initGL();
-	createBufferShadowMapping();
 	Ambient = new DirectionalLight();
 	spotLight = new SpotLight();
 	PointLight *aux1 = new PointLight();
@@ -694,7 +693,7 @@ bool init()
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/uvSphere.obj"));
+	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
@@ -872,6 +871,7 @@ bool init()
 	// Loads the texture into the GPU
 
 	updateDataInterface();
+	createBufferShadowMapping();
 	createDepthQuad();
 
 	return true;
