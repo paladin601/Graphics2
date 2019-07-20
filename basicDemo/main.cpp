@@ -834,7 +834,7 @@ bool init()
 	meshes[18]->setTextureCubeMap(0);
 	meshes[18]->setKDepth(1);
 
-	meshes[19]->setTranslate(glm::vec3(2.0f, 1.1f, 0.0f));
+	meshes[19]->setTranslate(glm::vec3(3.0f, 0.85f, 1.0f));
 	meshes[19]->setMaterialType(1);
 	meshes[19]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshes[19]->setTextureCubeMap(0);
@@ -1108,24 +1108,13 @@ void renderDepth() {
 			shaders[5]->setMat4("modelMatrix", Model);
 
 			glBindVertexArray(geo->getVAO());
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, textureIDS->getTextureID(mesh->getTextureCubeMap()));
-
 
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
-
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKS()));
-
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureNM()));
-
+					   
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));//disable specular and diffuse texture
 
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKDepth()));//depth texture
 			// Renders the triangle gemotry
 			glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
 			glBindVertexArray(0);
