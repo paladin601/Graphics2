@@ -28,6 +28,7 @@ CUserInterface::CUserInterface()
 	activeSL = false;
 	activePL1 = false;
 	activePL2 = false;
+	quad = false;
 	colorAmbientSL = colorAmbientPL1 = colorAmbientPL2 = glm::vec3(0.495f);
 	colorDiffuseSL = glm::vec3(1.0f);
 	colorSpecularSL = glm::vec3(1.0f);
@@ -59,6 +60,7 @@ CUserInterface::CUserInterface()
 
 	TwEnumVal DisplayMaterial[] = { { BLINN_PHON, "Blin Phong" },{ OREN_NAYAR, "Oren Nayar" },{ COOK_TORRANCE, "Cook Torrance" } };
 	TwType DeployTwTypeMaterial = TwDefineEnum("DeployTypeMaterial", DisplayMaterial, 3);
+	TwAddVarRW(mUserInterface, "Quad Shadow", TW_TYPE_BOOLCPP, &quad, "label='Render Quad'");
 
 
 	TwAddVarRW(mUserInterface, "Material Mesh", DeployTwTypeMaterial, &mMaterial, "label='Selected Material' group='Mesh'");
@@ -496,6 +498,16 @@ void CUserInterface::setShininessGeometry(float shiny)
 void CUserInterface::setRoughnessGeometry(float rough)
 {
 	roughness = rough;
+}
+
+void CUserInterface::setQuadActive(bool active)
+{
+	quad = active;
+}
+
+bool CUserInterface::getQuadActive()
+{
+	return quad;
 }
 
 bool CUserInterface::getDLActive()

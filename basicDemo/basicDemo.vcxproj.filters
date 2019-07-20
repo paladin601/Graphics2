@@ -151,5 +151,11 @@
     <None Include="assets\shaders\depthShader.vert">
       <Filter>Archivos de recursos\Shaders</Filter>
     </None>
+    <None Include="assets\shaders\depthQuadShader.frag">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\depthQuadShader.vert">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

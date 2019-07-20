@@ -29,6 +29,8 @@ unsigned int windowHeight = 800;
 unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
 unsigned int depthMapFBO;
 unsigned int depthMap;
+unsigned int quadVAO;
+unsigned int quadVBO;
 
 float aspectRatio = float(windowWidth / windowHeight);
 const char *windowTitle = "CCG Tarea";
@@ -48,7 +50,8 @@ bool firstMouse = true;
 bool mouseOn = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
+bool quad = false;
+float near_plane = 0.01f, far_plane = 25.f;
 
 
 GLFWwindow *window;
@@ -189,6 +192,8 @@ void processKeyboardInput(GLFWwindow *window)
 		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/depthShader.vert", "assets/shaders/depthShader.frag");
+		shaders.push_back(shader);
+		shader = new Shader("assets/shaders/depthQuadShader.vert", "assets/shaders/depthQuadShader.frag");
 		shaders.push_back(shader);
 
 	}
@@ -439,6 +444,7 @@ void updateDataInterface() {
 
 void updateUserInterface()
 {
+	quad = userInterface->getQuadActive();
 	geo = NULL;
 	auxPicked = userInterface->getMeshPicked();
 	if (auxPicked != meshPicked) {
@@ -510,6 +516,31 @@ void updateUserInterface()
 
 }
 
+void createDepthQuad() {
+	float quadVertices[] = {
+		-1.0f,  1.0f, 0.0f, 
+		0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 
+		0.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 
+		 1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f, 
+		 1.0f, 0.0f,
+	};
+
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glBindVertexArray(0);
+}
+
+
 void createBufferShadowMapping() {
 
 	glGenFramebuffers(1, &depthMapFBO);
@@ -559,6 +590,8 @@ bool init()
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/depthShader.vert", "assets/shaders/depthShader.frag");
+	shaders.push_back(shader);
+	shader = new Shader("assets/shaders/depthQuadShader.vert", "assets/shaders/depthQuadShader.frag");
 	shaders.push_back(shader);
 
 
@@ -838,6 +871,7 @@ bool init()
 	// Loads the texture into the GPU
 
 	updateDataInterface();
+	createDepthQuad();
 
 	return true;
 }
@@ -1043,9 +1077,7 @@ void render()
 			}
 		}
 	}
-	TwDraw();
 
-	glfwSwapBuffers(window);
 
 }
 
@@ -1053,7 +1085,6 @@ void renderDepth() {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	float near_plane = 0.01f, far_plane = 25.f;
 	lightProjection = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
 	lightView = glm::lookAt(Ambient->direction*-1.f, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
@@ -1111,6 +1142,18 @@ void renderDepth() {
 
 }
 
+void renderQuad() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shaders[6]->use();
+	shaders[6]->setFloat("near_plane", near_plane);
+	shaders[6]->setFloat("far_plane", far_plane);
+	shaders[6]->setInt("depthMap", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
 /**
  * App main loop
  * */
@@ -1129,8 +1172,16 @@ void update()
 
 		renderDepth();
 
+		if (!quad) {
+			render();
+		}
+		else {
+			renderQuad();
+		}
 		// Renders everything
-		render();
+		TwDraw();
+
+		glfwSwapBuffers(window);
 
 		// Check and call events
 		glfwPollEvents();
@@ -1166,6 +1217,9 @@ int main(int argc, char const *argv[])
 		textureID = textureIDS->getTextureID(i);
 		glDeleteTextures(1, &textureID);
 	}
+	glDeleteTextures(1, &depthMap);
+	glDeleteFramebuffers(1, &depthMapFBO);
+
 	// Deletes the vertex array from the GPU
 
 	for (n = 0; n < max; n++) {
@@ -1186,6 +1240,9 @@ int main(int argc, char const *argv[])
 		}
 		meshes[n]->~Mesh();
 	}
+
+	glDeleteVertexArrays(1, &quadVAO);
+	glDeleteBuffers(1, &quadVBO);
 
 	// Stops the glfw program
 	glfwTerminate();

@@ -35,6 +35,7 @@ private:
 	glm::vec3 DLAmbient;
 	glm::vec3 colorSpecularSL, colorAmbientSL, colorDiffuseSL;
 	bool activeDL, activeSL, activePL1, activePL2,kdMesh,ksMesh, knMesh, kdepth ,reflectMesh,refractMesh;
+	bool quad;
 
 	glm::vec3 colorSpecularPL1, colorAmbientPL1, colorDiffusePL1;
 	glm::vec3 colorSpecularPL2, colorAmbientPL2, colorDiffusePL2;
@@ -113,6 +114,10 @@ public:
 	void setShininessGeometry(float);
 	void setRoughnessGeometry(float);
 
+	void setQuadActive(bool);
+
+
+	bool getQuadActive();
 
 	bool getDLActive();
 	glm::vec3 getDLLightAmbient();
