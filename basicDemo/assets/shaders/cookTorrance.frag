@@ -9,7 +9,9 @@ in Data{
     vec3 directionSP;
     vec3 directionAL;
     vec3 viewPos;
-    vec4 vertexPosLight;
+    vec4 vertexPosLightAL;
+    vec4 vertexPosLightSP;
+    vec4 vertexPosLightPL[2];
 }dataIn;
 in vec2 vTexture;
 
@@ -73,12 +75,14 @@ struct Material{
 uniform Material objMaterial;
 uniform float height_scale=0.1f;
 uniform samplerCube skybox;
-uniform sampler2D shadowMap;
+uniform sampler2D shadowMapAL;
+uniform sampler2D shadowMapSP;
+uniform sampler2D shadowMapPL[2];
 float PI=3.14159265f;
 
 
 
-float ShadowCalculation(vec4 fragPosLightSpace , vec3 normal ,vec3 lightDir)
+float ShadowCalculation(vec4 fragPosLightSpace , vec3 normal ,vec3 lightDir,sampler2D shadowMap)
 {
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -163,7 +167,7 @@ float cookTorranceVal(vec3 normal, vec3 lightDir, vec3 viewDir){
 
 vec3 PointLightCon(PointLight light,vec3 normal, vec3 lightDir, vec3 viewDir, vec3 kd,vec3 ks,int i){
     vec3 Contribution;
-    vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
+    vec3 ambient=light.AmbientColor* kd * 0.1;
     float LdotN=clamp(dot(lightDir,normal),0.0f, 1.0f);
     float diff=LdotN;
     vec3 diffuse=light.DifusseColor*(diff *kd);
@@ -178,14 +182,14 @@ vec3 PointLightCon(PointLight light,vec3 normal, vec3 lightDir, vec3 viewDir, ve
     float distance =length(dataIn.positionPL[i]-dataIn.vertexPos);
     float attenuation = Attenuation(light.Constant,light.Linear ,light.Quadratic ,distance);
 
-    
-    Contribution=LdotN*(ambient+diffuse+specular) *attenuation;
+     float shadow = ShadowCalculation(dataIn.vertexPosLightPL[i],normal,lightDir,shadowMapPL[i]);
+    Contribution=LdotN*(ambient+(1.0 - shadow)*(diffuse+specular)) *attenuation;
     return Contribution;
 }
 
 vec3 AmbientLightCon(AmbientLight light,vec3 normal, vec3 lightDir, vec3 viewDir, vec3 kd,vec3 ks){
     vec3 Contribution;
-    vec3 ambient=light.AmbientColor * objMaterial.AmbientColor;
+    vec3 ambient=light.AmbientColor * kd * 0.1;
     float LdotN=clamp(dot(lightDir,normal),0.0f, 1.0f);
     float diff=LdotN;
     vec3 diffuse=light.DifusseColor*(diff *kd);
@@ -195,7 +199,7 @@ vec3 AmbientLightCon(AmbientLight light,vec3 normal, vec3 lightDir, vec3 viewDir
         spec=cookTorranceVal(normal,lightDir,viewDir);
     }
     vec3 specular=light.SpecularColor*(spec * ks);
-    float shadow = ShadowCalculation(dataIn.vertexPosLight,normal,lightDir); 
+    float shadow = ShadowCalculation(dataIn.vertexPosLightAL,normal,lightDir,shadowMapAL);
     Contribution=LdotN *(ambient+(1.0 - shadow)*(diffuse+specular));
     return Contribution;
 }
@@ -203,7 +207,7 @@ vec3 AmbientLightCon(AmbientLight light,vec3 normal, vec3 lightDir, vec3 viewDir
 vec3 SpotLightCon(SpotLight light, vec3 normal, vec3 lightDir,vec3 viewDir, vec3 kd,vec3 ks){
     vec3 Contribution;
     
-    vec3 ambient=light.AmbientColor* objMaterial.AmbientColor;
+    vec3 ambient=light.AmbientColor* kd * 0.1;
     float LdotN=clamp(dot(lightDir,normal),0.0f, 1.0f);
     float diff=LdotN;
     vec3 diffuse=light.DifusseColor*(diff *kd);
@@ -219,8 +223,8 @@ vec3 SpotLightCon(SpotLight light, vec3 normal, vec3 lightDir,vec3 viewDir, vec3
     float theta = dot(lightDir, normalize(-dataIn.directionSP)); 
     float epsilon = light.CuttOff - light.OuterCutOff;
     float intensity = clamp((theta - light.OuterCutOff) / epsilon, 0.0, 1.0);
-
-    Contribution=LdotN*(ambient+diffuse+specular)*attenuation *intensity;
+    float shadow = ShadowCalculation(dataIn.vertexPosLightSP,normal,lightDir,shadowMapSP);
+    Contribution=LdotN*(ambient+(1.0 - shadow)*(diffuse+specular))*attenuation *intensity;
     return Contribution;
 
 }

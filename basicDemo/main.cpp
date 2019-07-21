@@ -27,8 +27,8 @@ using namespace std;
 unsigned int windowWidth = 800;
 unsigned int windowHeight = 800;
 unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
-unsigned int depthMapFBO;
-unsigned int depthMap;
+unsigned int depthMapFBO[4];
+unsigned int depthMap[4];
 unsigned int quadVAO;
 unsigned int quadVBO;
 
@@ -73,6 +73,7 @@ glm::mat4 lightView;
 glm::mat4 lightSpaceMatrix;
 float near_plane = 0.01f, far_plane = 25.f;
 glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+glm::mat4 lightMatrixAL, lightMatrixSP, lightMatrixPL[2];
 
 
 
@@ -544,20 +545,57 @@ void createDepthQuad() {
 
 void createBufferShadowMapping() {
 
-	glGenFramebuffers(1, &depthMapFBO);
-	// create depth texture
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glGenFramebuffers(4, depthMapFBO);
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glGenTextures(4, depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	// attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[0]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[0], 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_2D, depthMap[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[1]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[1], 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_2D, depthMap[2]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[2]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[2], 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindTexture(GL_TEXTURE_2D, depthMap[3]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[3]);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[3], 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -921,7 +959,10 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setInt("objMaterial.kn", kn);
 	shaders[shaderSelect]->setInt("objMaterial.kdepth", kdepth);
 	shaders[shaderSelect]->setInt("objMaterial.depthTexture", 5);
-	shaders[shaderSelect]->setInt("shadowMap", 6);
+	shaders[shaderSelect]->setInt("shadowMapAL", 6);
+	shaders[shaderSelect]->setInt("shadowMapSP", 7);
+	shaders[shaderSelect]->setInt("shadowMapPL[0]", 8);
+	shaders[shaderSelect]->setInt("shadowMapPL[1]", 9);
 
 
 	if (shaderSelect != 3) {//3 es orennayar
@@ -963,7 +1004,10 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setMat4("modelViewMatrix", ModelView);
 	shaders[shaderSelect]->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(Model))));
 	shaders[shaderSelect]->setMat4("mvpMatrix", MVP);
-	shaders[shaderSelect]->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+	shaders[shaderSelect]->setMat4("lightSpaceMatrixAL", lightMatrixAL);
+	shaders[shaderSelect]->setMat4("lightSpaceMatrixSP", lightMatrixSP);
+	shaders[shaderSelect]->setMat4("lightSpaceMatrixPL[0]", lightMatrixPL[0]);
+	shaders[shaderSelect]->setMat4("lightSpaceMatrixPL[1]", lightMatrixPL[1]);
 
 
 }
@@ -1000,7 +1044,16 @@ void activeTexture() {
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKDepth()));//depth texture
 
 	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, depthMap);//depth map
+	glBindTexture(GL_TEXTURE_2D, depthMap[0]);//depth map
+
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, depthMap[1]);//depth map
+
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, depthMap[2]);//depth map
+
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, depthMap[3]);//depth map
 }
 
 void render()
@@ -1082,16 +1135,16 @@ void render()
 
 }
 
-void renderDepth() {
+glm::mat4 renderDepth(glm::vec3 pos, unsigned int depthMapFBOAc) {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	lightView = glm::lookAt(Ambient->direction*-2.f, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+	lightView = glm::lookAt(pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 	lightSpaceMatrix = lightProjection * lightView;
 	shaders[5]->use();
 	shaders[5]->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBOAc);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	for (i = 3; i < max; i++) {
@@ -1129,16 +1182,18 @@ void renderDepth() {
 	// reset viewport
 	glViewport(0, 0, windowWidth, windowHeight);
 
+	return lightSpaceMatrix;
+
 }
 
-void renderQuad() {
+void renderQuad(unsigned int depthMapAc) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaders[6]->use();
 	shaders[6]->setFloat("near_plane", near_plane);
 	shaders[6]->setFloat("far_plane", far_plane);
 	shaders[6]->setInt("depthMap", 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMapAc);
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
@@ -1159,13 +1214,16 @@ void update()
 		processKeyboardInput(window);
 		updateUserInterface();
 
-		renderDepth();
+		lightMatrixAL = renderDepth(Ambient->direction*-2.f,depthMapFBO[0]);
+		lightMatrixSP = renderDepth(camera->Position+camera->Front, depthMapFBO[1]);
+		lightMatrixPL[0] = renderDepth(pointLights[0]->position, depthMapFBO[2]);
+		lightMatrixPL[1] = renderDepth(pointLights[1]->position, depthMapFBO[3]);
 
 		if (!quad) {
 			render();
 		}
 		else {
-			renderQuad();
+			renderQuad(depthMap[0]);
 		}
 		// Renders everything
 		TwDraw();
@@ -1206,8 +1264,8 @@ int main(int argc, char const *argv[])
 		textureID = textureIDS->getTextureID(i);
 		glDeleteTextures(1, &textureID);
 	}
-	glDeleteTextures(1, &depthMap);
-	glDeleteFramebuffers(1, &depthMapFBO);
+	glDeleteTextures(4, depthMap);
+	glDeleteFramebuffers(4, depthMapFBO);
 
 	// Deletes the vertex array from the GPU
 

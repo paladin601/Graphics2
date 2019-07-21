@@ -14,7 +14,9 @@ out Data{
     vec3 directionSP;
     vec3 directionAL;
     vec3 viewPos;
-    vec4 vertexPosLight;
+    vec4 vertexPosLightAL;
+    vec4 vertexPosLightSP;
+    vec4 vertexPosLightPL[2];
 }dataOut;
 
 uniform vec3 PositionPL[2];
@@ -30,7 +32,9 @@ uniform mat3 normalMatrix;
 uniform mat4 mvpMatrix;
 out vec2 vTexture;
 uniform int knActive;
-uniform mat4 lightSpaceMatrix;
+uniform mat4 lightSpaceMatrixAL;
+uniform mat4 lightSpaceMatrixSP;
+uniform mat4 lightSpaceMatrixPL[2];
 
 void main() {
 
@@ -51,7 +55,10 @@ void main() {
     }
     vec3 vertex=vec3(modelMatrix*vec4(position,1.f));
     dataOut.normal= normalMatrix*normal;
-    dataOut.vertexPosLight=lightSpaceMatrix* vec4(vertex,1.0f);
+    dataOut.vertexPosLightAL=lightSpaceMatrixAL* vec4(vertex,1.0f);
+    dataOut.vertexPosLightSP=lightSpaceMatrixSP* vec4(vertex,1.0f);
+    dataOut.vertexPosLightPL[0]=lightSpaceMatrixPL[0]* vec4(vertex,1.0f);
+    dataOut.vertexPosLightPL[1]=lightSpaceMatrixPL[1]* vec4(vertex,1.0f);
     dataOut.vertexPos= TBN*vertex;
     dataOut.positionPL[0]= TBN*PositionPL[0];
     dataOut.positionPL[1]= TBN*PositionPL[1];
