@@ -70,7 +70,7 @@ public:
 	int getTextureKDepth();
 	vector<glm::vec3> getTangent();
 	vector<glm::vec3> getBitangent();
-	int getVAO();
+	unsigned int getVAO();
 	vector<unsigned int> getVBO();
 	glm::mat4 getGeometryMatrix();
 	vector<glm::vec3> getFaces();

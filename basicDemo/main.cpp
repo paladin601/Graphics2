@@ -67,6 +67,7 @@ vector<PointLight *> pointLights;
 Geometry *geo;
 Mesh *mesh;
 vector<unsigned int>VBOaux;
+vector<unsigned int>VBOS,VAOS;
 Camera *camera = new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
 glm::mat4 MVP, Projection, View, Model, ModelView;
 glm::mat4 lightView;
@@ -601,6 +602,48 @@ void createBufferShadowMapping() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+Mesh* meshClone(Mesh* meshAux,glm::vec3 position,glm::vec3 scale,glm::vec3 rotation){
+	int lengthGeo=meshAux->getGeometryLength();
+	int in;
+	Mesh* meshAct;
+	Geometry*geoAct, *geoAux;
+	meshAct=new Mesh();
+	for(in=0;in<lengthGeo;in++){
+		geoAct=new Geometry();
+		geoAux = meshAux->getGeometry(in);
+		geoAct->setVAO(geoAux->getVAO());
+		geoAct->setName(geoAux->getName());
+		geoAct->setSizeVertex(geoAux->getSizeVertex());
+		meshAct->setGeometry(geoAct);
+		meshAct->setTextureGeometry(in,geoAux->getTextureKD(),geoAux->getTextureKS(),geoAux->getTextureNM(),geoAux->getTextureKDepth());
+	}
+	meshAct->setRotate(rotation);
+	meshAct->setScale(scale);
+	meshAct->setTranslate(position);
+	meshAct->setKD(meshAux->getKD());
+	meshAct->setKS(meshAux->getKS());
+	meshAct->setKN(meshAux->getKN());
+	meshAct->setKDepth(meshAux->getKDepth());
+	meshAct->setMaterialType(meshAux->getMaterialType());
+	meshAct->setTextureCubeMap(meshAux->getTextureCubeMap());
+	return meshAct;
+}
+
+void pushBuffers(Mesh* meshAux){
+	int lengthGeo=meshAux->getGeometryLength();
+	int in;
+	for(in=0;in<lengthGeo;in++){
+		VAOS.push_back(meshAux->getGeometry(in)->getVAO());
+		
+		VBOaux=meshAux->getGeometry(in)->getVBO();
+		VBOS.push_back(VBOaux[0]);
+		VBOS.push_back(VBOaux[1]);
+		VBOS.push_back(VBOaux[2]);
+		VBOS.push_back(VBOaux[3]);
+		VBOS.push_back(VBOaux[4]);
+	}
+}
+
 bool init()
 {
 	// Initialize the window, and the glad components
@@ -643,6 +686,7 @@ bool init()
 		"assets/textures/skybox/back.jpg",
 	};
 
+	// Loads the texture into the GPU
 	textureIDS->setTexture(loaderTexture.loadCubeMap(faces));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/white.jpg"));
 	textureIDS->setTexture(loaderTexture.load("assets/textures/normalD.png"));
@@ -708,205 +752,209 @@ bool init()
 
 
 
+	vector<Mesh *> meshesC;
+	meshesC.push_back(loaderGeometry.load("assets/obj/pointlight.obj"));
 
-	meshes.push_back(loaderGeometry.load("assets/obj/pointlight.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/pointlight.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/skybox.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/floor.obj"));
+	meshesC.push_back(loaderGeometry.load("assets/obj/skybox.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/floor.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/pikachu.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/charmander.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/bulbasaur.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	
+	meshesC.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
 
-	meshes.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
+	meshesC[1]->setMaterialType(0);
+	meshesC[1]->setTextureCubeMap(0);
 
-	meshes.push_back(loaderGeometry.load("assets/obj/pikachu.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/charmander.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/bulbasaur.obj"));
+	meshesC[2]->setMaterialType(1);
+	meshesC[2]->setTextureCubeMap(0);
+	meshesC[2]->setTextureGeometry(0, 5, 5, 31, 33);
+	meshesC[2]->setKD(0);
+	meshesC[2]->setKS(0);
+	meshesC[2]->setKN(0);
 
-	meshes.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	meshes.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
+	meshesC[3]->setMaterialType(1);
+	meshesC[3]->setTextureCubeMap(0);
+	meshesC[3]->setTextureGeometry(0, 3, 4, 32, 33);
 
+	meshesC[4]->setMaterialType(3);
+	meshesC[4]->setTextureCubeMap(0);
+	meshesC[4]->setTextureGeometry(0, 6, 7, 25, 33);
+	meshesC[4]->setTextureGeometry(2, 8, 9, 26, 33);
+	meshesC[4]->setTextureGeometry(3, 10, 11, 27, 33);
+	meshesC[4]->setTextureGeometry(4, 12, 13, 28, 33);
+	meshesC[4]->setTextureGeometry(5, 14, 15, 29, 33);
+	meshesC[4]->setTextureGeometry(6, 16, 17, 30, 33);
+
+	meshesC[5]->setMaterialType(1);
+	meshesC[5]->setTextureCubeMap(0);
+	meshesC[5]->setTextureGeometry(0, 18, 18, 32, 33);
+	meshesC[5]->setTextureGeometry(1, 19, 19, 32, 33);
+	meshesC[5]->setKN(0);
+
+	meshesC[6]->setMaterialType(2);
+	meshesC[6]->setTextureCubeMap(0);
+	meshesC[6]->setTextureGeometry(0, 20, 20, 32, 33);
+	meshesC[6]->setTextureGeometry(1, 21, 21, 32, 33);
+	meshesC[6]->setTextureGeometry(2, 22, 22, 32, 33);
+	meshesC[6]->setTextureGeometry(3, 22, 22, 32, 33);
+	meshesC[6]->setKN(0);
+
+	meshesC[7]->setMaterialType(3);
+	meshesC[7]->setTextureCubeMap(0);
+	meshesC[7]->setTextureGeometry(0, 24, 24, 32, 33);
+	meshesC[7]->setTextureGeometry(1, 23, 23, 32, 33);
+	meshesC[7]->setTextureGeometry(2, 24, 24, 32, 33);
+	meshesC[7]->setKN(0);
+
+	meshesC[8]->setMaterialType(1);
+	meshesC[8]->setTextureCubeMap(0);
+	meshesC[8]->setTextureGeometry(0, 34, 34, 35, 33);
+	meshesC[8]->setKDepth(1);
+
+	meshesC[9]->setMaterialType(1);
+	meshesC[9]->setTextureCubeMap(0);
+	meshesC[9]->setTextureGeometry(0, 34, 34, 35, 33);
+	meshesC[9]->setKDepth(1);
+
+	max = meshesC.size();
 	// Loads all the geometry into the GPU
-	/*
-		models[0]->setMaterialType(-1);
-		meshes[1]->setMaterialType(-1);
-	*/
-
-	meshes[2]->setMaterialType(0);
-	meshes[2]->setTextureCubeMap(0);
-
-
-	meshes[3]->setMaterialType(1);
-	meshes[3]->setTextureGeometry(0, 5, 5, 31, 33);
-	meshes[3]->setTextureCubeMap(0);
-	meshes[3]->setKD(0);
-	meshes[3]->setKS(0);
-	meshes[3]->setKN(0);
-
-
-
-	meshes[4]->setMaterialType(1);
-	meshes[4]->setTranslate(glm::vec3(-3.0f, 0.61f, 0.0f));
-	meshes[4]->setTextureGeometry(0, 3, 4, 32, 33);
-	meshes[4]->setTextureCubeMap(0);
-
-
-
-	meshes[5]->setMaterialType(2);
-	meshes[5]->setTranslate(glm::vec3(-4.5f, 0.61f, 0.0f));
-	meshes[5]->setTextureGeometry(0, 3, 4, 32, 33);
-	meshes[5]->setTextureCubeMap(0);
-
-
-	meshes[6]->setTranslate(glm::vec3(-6.0f, 1.35f, 0.0f));
-	meshes[6]->setMaterialType(3);
-	meshes[6]->setTextureGeometry(0, 6, 7, 25, 33);
-	meshes[6]->setTextureGeometry(2, 8, 9, 26, 33);
-	meshes[6]->setTextureGeometry(3, 10, 11, 27, 33);
-	meshes[6]->setTextureGeometry(4, 12, 13, 28, 33);
-	meshes[6]->setTextureGeometry(5, 14, 15, 29, 33);
-	meshes[6]->setTextureGeometry(6, 16, 17, 30, 33);
-	meshes[6]->setTextureCubeMap(0);
-
-
-
-	meshes[7]->setTranslate(glm::vec3(3.0f, 0.41f, -3.0f));
-	meshes[7]->setMaterialType(1);
-	meshes[7]->setKN(0);
-	meshes[7]->setTextureGeometry(0, 18, 18, 32, 33);
-	meshes[7]->setTextureGeometry(1, 19, 19, 32, 33);
-	meshes[7]->setTextureCubeMap(0);
-
-
-	meshes[8]->setTranslate(glm::vec3(4.0f, 0.55f, -3.0f));
-	meshes[8]->setMaterialType(2);
-	meshes[8]->setKN(0);
-	meshes[8]->setTextureGeometry(0, 20, 20, 32, 33);
-	meshes[8]->setTextureGeometry(1, 21, 21, 32, 33);
-	meshes[8]->setTextureGeometry(2, 22, 22, 32, 33);
-	meshes[8]->setTextureGeometry(3, 22, 22, 32, 33);
-	meshes[8]->setTextureCubeMap(0);
-
-	meshes[9]->setTranslate(glm::vec3(5.0f, 0.27f, -3.0f));
-	meshes[9]->setMaterialType(3);
-	meshes[9]->setKN(0);
-	meshes[9]->setTextureGeometry(0, 24, 24, 32, 33);
-	meshes[9]->setTextureGeometry(1, 23, 23, 32, 33);
-	meshes[9]->setTextureGeometry(2, 24, 24, 32, 33);
-	meshes[9]->setTextureCubeMap(0);
-
-	meshes[10]->setTranslate(glm::vec3(-1.5f, 0.61f, -6.0f));
-	meshes[10]->setTextureGeometry(0, 3, 4, 32, 33);
-	meshes[10]->setMaterialType(3);
-	meshes[10]->setTextureCubeMap(0);
-
-
-	meshes[11]->setTranslate(glm::vec3(0.0f, 1.35f, -6.0f));
-	meshes[11]->setMaterialType(3);
-	meshes[11]->setTextureGeometry(0, 6, 7, 25, 33);
-	meshes[11]->setTextureGeometry(2, 8, 9, 26, 33);
-	meshes[11]->setTextureGeometry(3, 10, 11, 27, 33);
-	meshes[11]->setTextureGeometry(4, 12, 13, 28, 33);
-	meshes[11]->setTextureGeometry(5, 14, 15, 29, 33);
-	meshes[11]->setTextureGeometry(6, 16, 17, 30, 33);
-	meshes[11]->setTextureCubeMap(0);
-
-
-	meshes[12]->setTranslate(glm::vec3(1.5f, 1.35f, -6.0f));
-	meshes[12]->setMaterialType(3);
-	meshes[12]->setTextureGeometry(0, 6, 7, 25, 33);
-	meshes[12]->setTextureGeometry(2, 8, 9, 26, 33);
-	meshes[12]->setTextureGeometry(3, 10, 11, 27, 33);
-	meshes[12]->setTextureGeometry(4, 12, 13, 28, 33);
-	meshes[12]->setTextureGeometry(5, 14, 15, 29, 33);
-	meshes[12]->setTextureGeometry(6, 16, 17, 30, 33);
-	meshes[12]->setTextureCubeMap(0);
-
-	meshes[13]->setTranslate(glm::vec3(6.0f, 1.1f, -3.0f));
-	meshes[13]->setMaterialType(1);
-	meshes[13]->setTextureGeometry(0, 34, 34, 35, 33);
-	meshes[13]->setTextureCubeMap(0);
-	meshes[13]->setKDepth(1);
-
-	meshes[14]->setTranslate(glm::vec3(6.0f, 1.1f, -5.0f));
-	meshes[14]->setMaterialType(1);
-	meshes[14]->setTextureGeometry(0, 34, 34, 35, 33);
-	meshes[14]->setTextureCubeMap(0);
-	meshes[14]->setKDepth(1);
-
-	meshes[15]->setTranslate(glm::vec3(6.0f, 1.1f, -1.0f));
-	meshes[15]->setMaterialType(1);
-	meshes[15]->setTextureGeometry(0, 34, 34, 35, 33);
-	meshes[15]->setTextureCubeMap(0);
-	meshes[15]->setKDepth(1);
-
-	meshes[16]->setTranslate(glm::vec3(-4.0f, 1.1f, -9.0f));
-	meshes[16]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
-	meshes[16]->setMaterialType(1);
-	meshes[16]->setTextureGeometry(0, 36, 36, 37, 38);
-	meshes[16]->setTextureCubeMap(0);
-	meshes[16]->setKDepth(1);
-
-	meshes[17]->setTranslate(glm::vec3(0.0f, 1.1f, -9.0f));
-	meshes[17]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
-	meshes[17]->setMaterialType(1);
-	meshes[17]->setTextureGeometry(0, 36, 36, 37, 38);
-	meshes[17]->setTextureCubeMap(0);
-	meshes[17]->setKDepth(1);
-
-	meshes[18]->setTranslate(glm::vec3(4.0f, 1.1f, -9.0f));
-	meshes[18]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
-	meshes[18]->setMaterialType(1);
-	meshes[18]->setTextureGeometry(0, 39, 41, 40, 42);
-	meshes[18]->setTextureCubeMap(0);
-	meshes[18]->setKDepth(1);
-
-	meshes[19]->setTranslate(glm::vec3(3.0f, 0.85f, 1.0f));
-	meshes[19]->setMaterialType(1);
-	meshes[19]->setTextureGeometry(0, 34, 34, 35, 33);
-	meshes[19]->setTextureCubeMap(0);
-	meshes[19]->setKDepth(1);
-
-	meshes[20]->setTranslate(glm::vec3(0.0f, 1.1f, -2.0f));
-	meshes[20]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
-	meshes[20]->setMaterialType(1);
-	meshes[20]->setTextureGeometry(0, 43, 43, 35, 33);
-	meshes[20]->setTextureCubeMap(0);
-	meshes[20]->setKDepth(0);
-	meshes[20]->setKN(0);
-
-	meshes[21]->setTranslate(glm::vec3(0.0f, 1.1f, 0.0f));
-	meshes[21]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
-	meshes[21]->setMaterialType(1);
-	meshes[21]->setTextureGeometry(0, 43, 43, 35, 33);
-	meshes[21]->setTextureCubeMap(0);
-	meshes[21]->setKDepth(0);
-	meshes[21]->setKN(0);
-
-	meshes[22]->setTranslate(glm::vec3(0.0f, 1.1f, 2.0f));
-	meshes[22]->setRotate(glm::vec3(0.0f, 90.0f, 0.0f));
-	meshes[22]->setMaterialType(1);
-	meshes[22]->setTextureGeometry(0, 43, 43, 35, 33);
-	meshes[22]->setTextureCubeMap(0);
-	meshes[22]->setKDepth(0);
-	meshes[22]->setKN(0);
-
-	max = meshes.size();
 	for (i = 0; i < max; i++) {
-		mesh = meshes[i];
+		mesh = meshesC[i];
 		buildGeometry();
 	}
-	// Loads the texture into the GPU
+	int in;
+	max=meshesC.size();
+	for(in=0;in<max;in++){
+		pushBuffers(meshesC[in]);
+	}
+
+
+	//pointlight model
+	for(in=0;in<2;in++){
+		meshes.push_back(meshClone(meshesC[0],glm::vec3(0.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	}
+	//skybox
+	meshes.push_back(meshClone(meshesC[1],glm::vec3(0.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	//floor
+	meshes.push_back(meshClone(meshesC[2],glm::vec3(0.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+
+	vector<glm::vec3> positions={
+		glm::vec3(-3.0f, 0.61f, 0.0f),
+		glm::vec3(-4.5f, 0.61f, 0.0f),
+		glm::vec3(-6.0f, 0.61f, 0.0f),
+	};
+
+	vector<glm::vec3> rotations={
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+	};
+
+	vector<glm::vec3> scales={
+		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+	};
+	//cubes
+	for(in=0;in<positions.size();in++){
+		meshes.push_back(meshClone(meshesC[3],positions[in],scales[in],rotations[in]));
+	}
+
+	//pikachu
+	meshes.push_back(meshClone(meshesC[5],glm::vec3(3.0f, 0.41f, -3.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	//charmander
+	meshes.push_back(meshClone(meshesC[6],glm::vec3(4.0f, 0.55f, -3.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	//bulbasaur
+	meshes.push_back(meshClone(meshesC[7],glm::vec3(5.0f, 0.27f, -3.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+
+	positions.clear();
+
+	positions={
+		glm::vec3(-1.5f, 1.35f, -6.0f),
+		glm::vec3(0.0f, 1.35f, -6.0f),
+		glm::vec3(1.5f, 1.35f, -6.0f),
+	};
+	//personajes
+	for(in=0;in<positions.size();in++){
+		meshes.push_back(meshClone(meshesC[4],positions[in],scales[in],rotations[in]));
+	}
+
+	positions.clear();
+
+	positions={
+		glm::vec3(6.0f, 1.1f, -3.0f),
+		glm::vec3(6.0f, 1.1f, -5.0f),
+		glm::vec3(6.0f, 1.1f, -1.0f),
+	};
+	//brick red
+	for(in=0;in<positions.size();in++){
+		meshes.push_back(meshClone(meshesC[8],positions[in],scales[in],rotations[in]));
+	}
+
+	meshesC[8]->setTextureGeometry(0, 36, 36, 37, 38);
+	positions.clear();
+	rotations.clear();
+
+	positions={
+		glm::vec3(-4.0f, 1.1f, -9.0f),
+		glm::vec3(0.0f, 1.1f, -9.0f),
+	};
+	rotations={
+		glm::vec3(0.0f, 90.0f, 0.0f),
+		glm::vec3(0.0f, 90.0f, 0.0f),
+	};
+
+	//plane with texture floor
+	for(in=0;in<positions.size();in++){
+		meshes.push_back(meshClone(meshesC[8],positions[in],scales[in],rotations[in]));
+	}
+	
+	//plane with texture world
+	meshesC[8]->setTextureGeometry(0, 39, 41, 40, 42);
+	meshes.push_back(meshClone(meshesC[8],glm::vec3(4.0f, 1.1f, -9.0f),glm::vec3(1.0f),glm::vec3(0.0f, 90.0f, 0.0f)));
+
+
+	//esfera
+	meshes.push_back(meshClone(meshesC[9],glm::vec3(3.0f, 0.85f, 1.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+
+
+
+
+	meshesC[8]->setTextureGeometry(0, 43, 43, 35, 33);
+	meshesC[8]->setKDepth(0);
+	meshesC[8]->setKN(0);
+	positions.clear();
+	rotations.clear();
+
+	positions={
+		glm::vec3(0.0f, 1.1f, -2.0f),
+		glm::vec3(0.0f, 1.1f, 0.0f),
+		glm::vec3(0.0f, 1.1f, 2.0f),
+	};
+	rotations={
+		glm::vec3(0.0f, 90.0f, 0.0f),
+		glm::vec3(0.0f, 90.0f, 0.0f),
+		glm::vec3(0.0f, 90.0f, 0.0f),
+	};
+	//texture transparent
+	for(in=0;in<positions.size();in++){
+		meshes.push_back(meshClone(meshesC[8],positions[in],scales[in],rotations[in]));
+	}
+
+	max=meshes.size();
+
+
 
 	updateDataInterface();
 	createBufferShadowMapping();
@@ -1268,24 +1316,13 @@ int main(int argc, char const *argv[])
 	glDeleteFramebuffers(4, depthMapFBO);
 
 	// Deletes the vertex array from the GPU
-
+	max=VAOS.size();
 	for (n = 0; n < max; n++) {
-		cont = meshes[n]->getGeometryLength();
-		for (i = 0; i < cont; i++) {
-			geo = meshes[n]->getGeometry(i);
-			VAO = geo->getVAO();
-			glDeleteVertexArrays(1, &VAO);
-			// Deletes the vertex object from the GPU
-			VBOaux = geo->getVBO();
-			VBO[0] = VBOaux[0];
-			VBO[1] = VBOaux[1];
-			VBO[2] = VBOaux[2];
-			VBO[3] = VBOaux[3];
-			VBO[4] = VBOaux[4];
-			glDeleteBuffers(5, VBO);
-			// Destroy the shader
-		}
-		meshes[n]->~Mesh();
+		glDeleteVertexArrays(1, &VAOS[n]);
+	}
+	max=VBOS.size();
+	for (n = 0; n < max; n++) {
+		glDeleteBuffers(1, &VBOS[n]);
 	}
 
 	glDeleteVertexArrays(1, &quadVAO);
@@ -1302,6 +1339,8 @@ int main(int argc, char const *argv[])
 	delete camera;
 	delete textureIDS;
 
+	VAOS.clear();
+	VBOS.clear();
 	meshes.clear();
 	shaders.clear();
 	pointLights.clear();

@@ -150,7 +150,7 @@ vector<glm::vec3> Geometry::getBitangent()
 	return bitangent;
 }
 
-int Geometry::getVAO()
+unsigned int Geometry::getVAO()
 {
 	return VAO;
 }
@@ -184,6 +184,7 @@ Geometry::Geometry()
 	scale = glm::vec3(1.0f);
 	rotate = glm::vec3(0.0f);
 	material.setMaterial(-1);
+	textureKD = textureDepth = textureKS = textureNM = 0;
 }
 
 

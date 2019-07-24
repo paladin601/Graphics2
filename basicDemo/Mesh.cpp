@@ -7,8 +7,8 @@ Mesh::Mesh()
 	heightScale = 0.06f;
 	shininess = 128.0f;
 	roughness = 0.2f;
-	reflect = refract = kd = ks  = 0;
-	kn = 1;
+	reflect = refract = 0;
+	kd = ks  = kn = 1;
 	translate = glm::vec3(0.0f);
 	scale = glm::vec3(1.0f);
 	rotate = glm::vec3(0.0f);
@@ -19,6 +19,7 @@ Mesh::Mesh()
 	IORin = 1.52f;
 	IReflect = 1.0f;
 	FactorReflect = 0.8f;
+	
 }
 
 

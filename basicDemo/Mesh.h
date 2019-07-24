@@ -17,7 +17,6 @@ class Mesh
 private:
 	vector<Geometry *> geo;
 	Transform transform;
-	glm::mat4 meshMatrix;
 	glm::vec3 translate, rotate, scale;
 	int materialType;
 	int n;
