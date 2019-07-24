@@ -76,9 +76,6 @@ float near_plane = 0.01f, far_plane = 25.f;
 glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 glm::mat4 lightMatrixAL, lightMatrixSP, lightMatrixPL[2];
 
-
-
-
 /**
  * Handles the window resize
  * @param{GLFWwindow} window pointer
@@ -110,8 +107,6 @@ void mouseButton(GLFWwindow* window, int button, int action, int mods)
 	if (TwEventMouseButtonGLFW(button, action))
 		return;
 }
-
-
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
@@ -295,12 +290,6 @@ void initGL()
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 }
 
-/**
- * Builds all the geometry buffers and
- * loads them up into the GPU
- * (Builds a simple triangle)
- * */
-
 void buildGeometry()
 {
 	cont = mesh->getGeometryLength();
@@ -364,17 +353,6 @@ void buildGeometry()
 		glBindVertexArray(0);
 	}
 }
-
-/**
- * Loads a texture into the GPU
- * @param{const char} path of the texture file
- * @returns{unsigned int} GPU texture index
- * */
-
- /**
-  * Initialize everything
-  * @returns{bool} true if everything goes ok
-  * */
 
 void updateDataMesh() {
 
@@ -633,8 +611,7 @@ void pushBuffers(Mesh* meshAux){
 	int lengthGeo=meshAux->getGeometryLength();
 	int in;
 	for(in=0;in<lengthGeo;in++){
-		VAOS.push_back(meshAux->getGeometry(in)->getVAO());
-		
+		VAOS.push_back(meshAux->getGeometry(in)->getVAO());	
 		VBOaux=meshAux->getGeometry(in)->getVBO();
 		VBOS.push_back(VBOaux[0]);
 		VBOS.push_back(VBOaux[1]);
@@ -749,28 +726,16 @@ bool init()
 	//43
 	textureIDS->setTexture(loaderTexture.load("assets/textures/window.png"));
 
-
-
-
 	vector<Mesh *> meshesC;
 	meshesC.push_back(loaderGeometry.load("assets/obj/pointlight.obj"));
-
 	meshesC.push_back(loaderGeometry.load("assets/obj/skybox.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/floor.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/personaje.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/pikachu.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/charmander.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/bulbasaur.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
-	
 	meshesC.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
 
 	meshesC[1]->setMaterialType(0);
@@ -838,7 +803,6 @@ bool init()
 	for(in=0;in<max;in++){
 		pushBuffers(meshesC[in]);
 	}
-
 
 	//pointlight model
 	for(in=0;in<2;in++){
@@ -924,12 +888,8 @@ bool init()
 	meshesC[8]->setTextureGeometry(0, 39, 41, 40, 42);
 	meshes.push_back(meshClone(meshesC[8],glm::vec3(4.0f, 1.1f, -9.0f),glm::vec3(1.0f),glm::vec3(0.0f, 90.0f, 0.0f)));
 
-
-	//esfera
+	//esphere
 	meshes.push_back(meshClone(meshesC[9],glm::vec3(3.0f, 0.85f, 1.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
-
-
-
 
 	meshesC[8]->setTextureGeometry(0, 43, 43, 35, 33);
 	meshesC[8]->setKDepth(0);
@@ -953,9 +913,10 @@ bool init()
 	}
 
 	max=meshes.size();
-
-
-
+	meshesC.clear();
+	positions.clear();
+	rotations.clear();
+	scales.clear();
 	updateDataInterface();
 	createBufferShadowMapping();
 	createDepthQuad();
@@ -1059,17 +1020,6 @@ void activeShader(int shaderSelect) {
 
 
 }
-
-/**
- * Process the keyboard input
- * There are ways of implementing this function through callbacks provide by
- * the GLFW API, check the GLFW documentation to find more
- * @param{GLFWwindow} window pointer
- * */
-
- /**
-  * Render Function
-  * */
 
 void activeTexture() {
 	glActiveTexture(GL_TEXTURE0);
@@ -1349,5 +1299,3 @@ int main(int argc, char const *argv[])
 
 	return 0;
 }
-
-
