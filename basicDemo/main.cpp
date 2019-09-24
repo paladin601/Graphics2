@@ -15,8 +15,6 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Texture.h"
-#include "SpotLight.h"
-#include "PointLight.h"
 #include "DirectionalLight.h"
 #include "Mesh.h"
 #include "Geometry.h"
@@ -54,12 +52,10 @@ vector<Shader *> shaders;
 Shader *shader;
 Texture *textureIDS = new Texture();
 DirectionalLight *Ambient;
-SpotLight *spotLight;
-vector<PointLight *> pointLights;
 Geometry *geo;
 Mesh *mesh;
 vector<unsigned int>VBOaux;
-vector<unsigned int>VBOS,VAOS;
+vector<unsigned int>VBOS, VAOS;
 Camera *camera = new Camera(glm::vec3(-8.0f, 4.0f, 5.0f));
 glm::mat4 MVP, Projection, View, Model, ModelView;
 glm::mat4 lightView;
@@ -156,8 +152,6 @@ void processKeyboardInput(GLFWwindow *window)
 		// Reloads the shader
 		shaders.clear();
 
-		shader = new Shader("assets/shaders/pointLightLamp.vert", "assets/shaders/pointLightLamp.frag");
-		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
 		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
@@ -326,20 +320,20 @@ void buildGeometry()
 }
 
 
-Mesh* meshClone(Mesh* meshAux,glm::vec3 position,glm::vec3 scale,glm::vec3 rotation){
-	int lengthGeo=meshAux->getGeometryLength();
+Mesh* meshClone(Mesh* meshAux, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation) {
+	int lengthGeo = meshAux->getGeometryLength();
 	int in;
 	Mesh* meshAct;
 	Geometry*geoAct, *geoAux;
-	meshAct=new Mesh();
-	for(in=0;in<lengthGeo;in++){
-		geoAct=new Geometry();
+	meshAct = new Mesh();
+	for (in = 0; in < lengthGeo; in++) {
+		geoAct = new Geometry();
 		geoAux = meshAux->getGeometry(in);
 		geoAct->setVAO(geoAux->getVAO());
 		geoAct->setName(geoAux->getName());
 		geoAct->setSizeVertex(geoAux->getSizeVertex());
 		meshAct->setGeometry(geoAct);
-		meshAct->setTextureGeometry(in,geoAux->getTextureKD(),geoAux->getTextureKS(),geoAux->getTextureNM(),geoAux->getTextureKDepth());
+		meshAct->setTextureGeometry(in, geoAux->getTextureKD(), geoAux->getTextureKS(), geoAux->getTextureNM(), geoAux->getTextureKDepth());
 	}
 	meshAct->setRotate(rotation);
 	meshAct->setScale(scale);
@@ -353,12 +347,12 @@ Mesh* meshClone(Mesh* meshAux,glm::vec3 position,glm::vec3 scale,glm::vec3 rotat
 	return meshAct;
 }
 
-void pushBuffers(Mesh* meshAux){
-	int lengthGeo=meshAux->getGeometryLength();
+void pushBuffers(Mesh* meshAux) {
+	int lengthGeo = meshAux->getGeometryLength();
 	int in;
-	for(in=0;in<lengthGeo;in++){
-		VAOS.push_back(meshAux->getGeometry(in)->getVAO());	
-		VBOaux=meshAux->getGeometry(in)->getVBO();
+	for (in = 0; in < lengthGeo; in++) {
+		VAOS.push_back(meshAux->getGeometry(in)->getVAO());
+		VBOaux = meshAux->getGeometry(in)->getVBO();
 		VBOS.push_back(VBOaux[0]);
 		VBOS.push_back(VBOaux[1]);
 		VBOS.push_back(VBOaux[2]);
@@ -370,21 +364,14 @@ void pushBuffers(Mesh* meshAux){
 bool init()
 {
 	// Initialize the window, and the glad components
-	if (!initWindow() || !initGlad() )
+	if (!initWindow() || !initGlad())
 		return false;
 
 	// Initialize the opengl context
 	initGL();
 	Ambient = new DirectionalLight();
-	spotLight = new SpotLight();
-	PointLight *aux1 = new PointLight();
-	pointLights.push_back(aux1);
-	aux1 = new PointLight();
-	pointLights.push_back(aux1);
 
 	// Loads the shader
-	shader = new Shader("assets/shaders/pointLightLamp.vert", "assets/shaders/pointLightLamp.frag");
-	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
@@ -393,11 +380,6 @@ bool init()
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 	shaders.push_back(shader);
-	shader = new Shader("assets/shaders/depthShader.vert", "assets/shaders/depthShader.frag");
-	shaders.push_back(shader);
-	shader = new Shader("assets/shaders/depthQuadShader.vert", "assets/shaders/depthQuadShader.frag");
-	shaders.push_back(shader);
-
 
 	vector<string> faces
 	{
@@ -473,7 +455,6 @@ bool init()
 	textureIDS->setTexture(loaderTexture.load("assets/textures/window.png"));
 
 	vector<Mesh *> meshesC;
-	meshesC.push_back(loaderGeometry.load("assets/obj/pointlight.obj"));
 	meshesC.push_back(loaderGeometry.load("assets/obj/skybox.obj"));
 	meshesC.push_back(loaderGeometry.load("assets/obj/floor.obj"));
 	meshesC.push_back(loaderGeometry.load("assets/obj/cubito.obj"));
@@ -484,59 +465,59 @@ bool init()
 	meshesC.push_back(loaderGeometry.load("assets/obj/brick1.obj"));
 	meshesC.push_back(loaderGeometry.load("assets/obj/esfera.obj"));
 
-	meshesC[1]->setMaterialType(0);
+	meshesC[0]->setMaterialType(0);
+	meshesC[0]->setTextureCubeMap(0);
+
+	meshesC[1]->setMaterialType(1);
 	meshesC[1]->setTextureCubeMap(0);
+	meshesC[1]->setTextureGeometry(0, 5, 5, 31, 33);
+	meshesC[1]->setKD(0);
+	meshesC[1]->setKS(0);
+	meshesC[1]->setKN(0);
 
 	meshesC[2]->setMaterialType(1);
 	meshesC[2]->setTextureCubeMap(0);
-	meshesC[2]->setTextureGeometry(0, 5, 5, 31, 33);
-	meshesC[2]->setKD(0);
-	meshesC[2]->setKS(0);
-	meshesC[2]->setKN(0);
+	meshesC[2]->setTextureGeometry(0, 3, 4, 32, 33);
 
-	meshesC[3]->setMaterialType(1);
+	meshesC[3]->setMaterialType(3);
 	meshesC[3]->setTextureCubeMap(0);
-	meshesC[3]->setTextureGeometry(0, 3, 4, 32, 33);
+	meshesC[3]->setTextureGeometry(0, 6, 7, 25, 33);
+	meshesC[3]->setTextureGeometry(2, 8, 9, 26, 33);
+	meshesC[3]->setTextureGeometry(3, 10, 11, 27, 33);
+	meshesC[3]->setTextureGeometry(4, 12, 13, 28, 33);
+	meshesC[3]->setTextureGeometry(5, 14, 15, 29, 33);
+	meshesC[3]->setTextureGeometry(6, 16, 17, 30, 33);
 
-	meshesC[4]->setMaterialType(3);
+	meshesC[4]->setMaterialType(1);
 	meshesC[4]->setTextureCubeMap(0);
-	meshesC[4]->setTextureGeometry(0, 6, 7, 25, 33);
-	meshesC[4]->setTextureGeometry(2, 8, 9, 26, 33);
-	meshesC[4]->setTextureGeometry(3, 10, 11, 27, 33);
-	meshesC[4]->setTextureGeometry(4, 12, 13, 28, 33);
-	meshesC[4]->setTextureGeometry(5, 14, 15, 29, 33);
-	meshesC[4]->setTextureGeometry(6, 16, 17, 30, 33);
+	meshesC[4]->setTextureGeometry(0, 18, 18, 32, 33);
+	meshesC[4]->setTextureGeometry(1, 19, 19, 32, 33);
+	meshesC[4]->setKN(0);
 
-	meshesC[5]->setMaterialType(1);
+	meshesC[5]->setMaterialType(2);
 	meshesC[5]->setTextureCubeMap(0);
-	meshesC[5]->setTextureGeometry(0, 18, 18, 32, 33);
-	meshesC[5]->setTextureGeometry(1, 19, 19, 32, 33);
+	meshesC[5]->setTextureGeometry(0, 20, 20, 32, 33);
+	meshesC[5]->setTextureGeometry(1, 21, 21, 32, 33);
+	meshesC[5]->setTextureGeometry(2, 22, 22, 32, 33);
+	meshesC[5]->setTextureGeometry(3, 22, 22, 32, 33);
 	meshesC[5]->setKN(0);
 
-	meshesC[6]->setMaterialType(2);
+	meshesC[6]->setMaterialType(3);
 	meshesC[6]->setTextureCubeMap(0);
-	meshesC[6]->setTextureGeometry(0, 20, 20, 32, 33);
-	meshesC[6]->setTextureGeometry(1, 21, 21, 32, 33);
-	meshesC[6]->setTextureGeometry(2, 22, 22, 32, 33);
-	meshesC[6]->setTextureGeometry(3, 22, 22, 32, 33);
+	meshesC[6]->setTextureGeometry(0, 24, 24, 32, 33);
+	meshesC[6]->setTextureGeometry(1, 23, 23, 32, 33);
+	meshesC[6]->setTextureGeometry(2, 24, 24, 32, 33);
 	meshesC[6]->setKN(0);
 
-	meshesC[7]->setMaterialType(3);
+	meshesC[7]->setMaterialType(1);
 	meshesC[7]->setTextureCubeMap(0);
-	meshesC[7]->setTextureGeometry(0, 24, 24, 32, 33);
-	meshesC[7]->setTextureGeometry(1, 23, 23, 32, 33);
-	meshesC[7]->setTextureGeometry(2, 24, 24, 32, 33);
-	meshesC[7]->setKN(0);
+	meshesC[7]->setTextureGeometry(0, 34, 34, 35, 33);
+	meshesC[7]->setKDepth(1);
 
 	meshesC[8]->setMaterialType(1);
 	meshesC[8]->setTextureCubeMap(0);
 	meshesC[8]->setTextureGeometry(0, 34, 34, 35, 33);
 	meshesC[8]->setKDepth(1);
-
-	meshesC[9]->setMaterialType(1);
-	meshesC[9]->setTextureCubeMap(0);
-	meshesC[9]->setTextureGeometry(0, 34, 34, 35, 33);
-	meshesC[9]->setKDepth(1);
 
 	max = meshesC.size();
 	// Loads all the geometry into the GPU
@@ -545,120 +526,116 @@ bool init()
 		buildGeometry();
 	}
 	int in;
-	max=meshesC.size();
-	for(in=0;in<max;in++){
+	max = meshesC.size();
+	for (in = 0; in < max; in++) {
 		pushBuffers(meshesC[in]);
 	}
 
-	//pointlight model
-	for(in=0;in<2;in++){
-		meshes.push_back(meshClone(meshesC[0],glm::vec3(0.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
-	}
 	//skybox
-	meshes.push_back(meshClone(meshesC[1],glm::vec3(0.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	meshes.push_back(meshClone(meshesC[0], glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f)));
 	//floor
-	meshes.push_back(meshClone(meshesC[2],glm::vec3(0.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	meshes.push_back(meshClone(meshesC[1], glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f)));
 
-	vector<glm::vec3> positions={
+	vector<glm::vec3> positions = {
 		glm::vec3(-3.0f, 0.61f, 0.0f),
 		glm::vec3(-4.5f, 0.61f, 0.0f),
 		glm::vec3(-6.0f, 0.61f, 0.0f),
 	};
 
-	vector<glm::vec3> rotations={
+	vector<glm::vec3> rotations = {
 		glm::vec3(0.0f),
 		glm::vec3(0.0f),
 		glm::vec3(0.0f),
 	};
 
-	vector<glm::vec3> scales={
+	vector<glm::vec3> scales = {
 		glm::vec3(1.0f),
 		glm::vec3(1.0f),
 		glm::vec3(1.0f),
 	};
 	//cubes
-	for(in=0;in<positions.size();in++){
-		meshes.push_back(meshClone(meshesC[3],positions[in],scales[in],rotations[in]));
+	for (in = 0; in < positions.size(); in++) {
+		meshes.push_back(meshClone(meshesC[2], positions[in], scales[in], rotations[in]));
 	}
 
 	//pikachu
-	meshes.push_back(meshClone(meshesC[5],glm::vec3(3.0f, 0.41f, -3.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	meshes.push_back(meshClone(meshesC[4], glm::vec3(3.0f, 0.41f, -3.0f), glm::vec3(1.0f), glm::vec3(0.0f)));
 	//charmander
-	meshes.push_back(meshClone(meshesC[6],glm::vec3(4.0f, 0.55f, -3.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	meshes.push_back(meshClone(meshesC[5], glm::vec3(4.0f, 0.55f, -3.0f), glm::vec3(1.0f), glm::vec3(0.0f)));
 	//bulbasaur
-	meshes.push_back(meshClone(meshesC[7],glm::vec3(5.0f, 0.27f, -3.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	meshes.push_back(meshClone(meshesC[6], glm::vec3(5.0f, 0.27f, -3.0f), glm::vec3(1.0f), glm::vec3(0.0f)));
 
 	positions.clear();
 
-	positions={
+	positions = {
 		glm::vec3(-1.5f, 1.35f, -6.0f),
 		glm::vec3(0.0f, 1.35f, -6.0f),
 		glm::vec3(1.5f, 1.35f, -6.0f),
 	};
 	//personajes
-	for(in=0;in<positions.size();in++){
-		meshes.push_back(meshClone(meshesC[4],positions[in],scales[in],rotations[in]));
+	for (in = 0; in < positions.size(); in++) {
+		meshes.push_back(meshClone(meshesC[3], positions[in], scales[in], rotations[in]));
 	}
 
 	positions.clear();
 
-	positions={
+	positions = {
 		glm::vec3(6.0f, 1.1f, -3.0f),
 		glm::vec3(6.0f, 1.1f, -5.0f),
 		glm::vec3(6.0f, 1.1f, -1.0f),
 	};
 	//brick red
-	for(in=0;in<positions.size();in++){
-		meshes.push_back(meshClone(meshesC[8],positions[in],scales[in],rotations[in]));
+	for (in = 0; in < positions.size(); in++) {
+		meshes.push_back(meshClone(meshesC[7], positions[in], scales[in], rotations[in]));
 	}
 
-	meshesC[8]->setTextureGeometry(0, 36, 36, 37, 38);
+	meshesC[7]->setTextureGeometry(0, 36, 36, 37, 38);
 	positions.clear();
 	rotations.clear();
 
-	positions={
+	positions = {
 		glm::vec3(-4.0f, 1.1f, -9.0f),
 		glm::vec3(0.0f, 1.1f, -9.0f),
 	};
-	rotations={
+	rotations = {
 		glm::vec3(0.0f, 90.0f, 0.0f),
 		glm::vec3(0.0f, 90.0f, 0.0f),
 	};
 
 	//plane with texture floor
-	for(in=0;in<positions.size();in++){
-		meshes.push_back(meshClone(meshesC[8],positions[in],scales[in],rotations[in]));
+	for (in = 0; in < positions.size(); in++) {
+		meshes.push_back(meshClone(meshesC[7], positions[in], scales[in], rotations[in]));
 	}
-	
+
 	//plane with texture world
-	meshesC[8]->setTextureGeometry(0, 39, 41, 40, 42);
-	meshes.push_back(meshClone(meshesC[8],glm::vec3(4.0f, 1.1f, -9.0f),glm::vec3(1.0f),glm::vec3(0.0f, 90.0f, 0.0f)));
+	meshesC[7]->setTextureGeometry(0, 39, 41, 40, 42);
+	meshes.push_back(meshClone(meshesC[7], glm::vec3(4.0f, 1.1f, -9.0f), glm::vec3(1.0f), glm::vec3(0.0f, 90.0f, 0.0f)));
 
 	//esphere
-	meshes.push_back(meshClone(meshesC[9],glm::vec3(3.0f, 0.85f, 1.0f),glm::vec3(1.0f),glm::vec3(0.0f)));
+	meshes.push_back(meshClone(meshesC[8], glm::vec3(3.0f, 0.85f, 1.0f), glm::vec3(1.0f), glm::vec3(0.0f)));
 
-	meshesC[8]->setTextureGeometry(0, 43, 43, 35, 33);
-	meshesC[8]->setKDepth(0);
-	meshesC[8]->setKN(0);
+	meshesC[7]->setTextureGeometry(0, 43, 43, 35, 33);
+	meshesC[7]->setKDepth(0);
+	meshesC[7]->setKN(0);
 	positions.clear();
 	rotations.clear();
 
-	positions={
+	positions = {
 		glm::vec3(0.0f, 1.1f, -2.0f),
 		glm::vec3(0.0f, 1.1f, 0.0f),
 		glm::vec3(0.0f, 1.1f, 2.0f),
 	};
-	rotations={
+	rotations = {
 		glm::vec3(0.0f, 90.0f, 0.0f),
 		glm::vec3(0.0f, 90.0f, 0.0f),
 		glm::vec3(0.0f, 90.0f, 0.0f),
 	};
 	//texture transparent
-	for(in=0;in<positions.size();in++){
-		meshes.push_back(meshClone(meshesC[8],positions[in],scales[in],rotations[in]));
+	for (in = 0; in < positions.size(); in++) {
+		meshes.push_back(meshClone(meshesC[7], positions[in], scales[in], rotations[in]));
 	}
 
-	max=meshes.size();
+	max = meshes.size();
 	meshesC.clear();
 	positions.clear();
 	rotations.clear();
@@ -676,8 +653,6 @@ void activeShader(int shaderSelect) {
 	MVP = Projection * View* Model;
 
 	shaders[shaderSelect]->use();
-	shaders[shaderSelect]->setVec3("PositionPL[0]", pointLights[0]->position);
-	shaders[shaderSelect]->setVec3("PositionPL[1]", pointLights[1]->position);
 	shaders[shaderSelect]->setVec3("PositionSP", camera->Position);
 	shaders[shaderSelect]->setVec3("DirectionSP", camera->Front);
 	shaders[shaderSelect]->setVec3("DirectionAL", Ambient->direction);
@@ -717,36 +692,17 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setInt("shadowMapPL[1]", 9);
 
 
-	if (shaderSelect != 3) {//3 es orennayar
+	if (shaderSelect != 2) {//2 es orennayar
 		shaders[shaderSelect]->setVec3("objMaterial.SpecularColor", geo->material.specular);
 		shaders[shaderSelect]->setFloat("objMaterial.shininess", mesh->getShininess());
 
 		shaders[shaderSelect]->setInt("objMaterial.ksTexture", (mesh->getKS() == 1) ? 2 : 4);
 		shaders[shaderSelect]->setVec3("ambientLight.SpecularColor", Ambient->specular);
-		shaders[shaderSelect]->setVec3("spotLight.SpecularColor", spotLight->specular);
 	}
 
-	shaders[shaderSelect]->setInt("spotLight.Active", spotLight->active);
-	shaders[shaderSelect]->setFloat("spotLight.CuttOff", glm::cos(glm::radians(spotLight->cutOff)));
-	shaders[shaderSelect]->setFloat("spotLight.OuterCutOff", glm::cos(glm::radians(spotLight->outerCutOff)));
-	shaders[shaderSelect]->setVec3("spotLight.AmbientColor", spotLight->ambient);
-	shaders[shaderSelect]->setVec3("spotLight.DifusseColor", spotLight->diffuse);
-	shaders[shaderSelect]->setFloat("spotLight.Constant", spotLight->constant);
-	shaders[shaderSelect]->setFloat("spotLight.Linear", spotLight->linear);
-	shaders[shaderSelect]->setFloat("spotLight.Quadratic", spotLight->quadratic);
 
 	int s;
-	for (s = 0; s < pointLights.size(); s++) {
-		shaders[shaderSelect]->setInt("pointLight[" + to_string(s) + "].Active", pointLights[s]->active);
-		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].AmbientColor", pointLights[s]->ambient);
-		shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].DifusseColor", pointLights[s]->diffuse);
-		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Constant", pointLights[s]->constant);
-		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Linear", pointLights[s]->linear);
-		shaders[shaderSelect]->setFloat("pointLight[" + to_string(s) + "].Quadratic", pointLights[s]->quadratic);
-		if (shaderSelect != 3) {
-			shaders[shaderSelect]->setVec3("pointLight[" + to_string(s) + "].SpecularColor", pointLights[s]->specular);
-		}
-	}
+
 
 
 	ModelView = View * Model;
@@ -801,32 +757,21 @@ void render()
 			switch (materialType)
 			{
 			case 0:
-				shaders[1]->use();
-				shaders[1]->setInt("skybox", 0);
-				shaders[1]->setMat4("projectMatrix", Projection);
-				shaders[1]->setMat4("viewMatrix", glm::mat4(glm::mat3(View)));
+				shaders[0]->use();
+				shaders[0]->setInt("skybox", 0);
+				shaders[0]->setMat4("projectMatrix", Projection);
+				shaders[0]->setMat4("viewMatrix", glm::mat4(glm::mat3(View)));
 				break;
 			case 1:
-				activeShader(2);
+				activeShader(1);
 				break;
 			case 2:
-				activeShader(3);
+				activeShader(2);
 				break;
 			case 3:
-				activeShader(4);
+				activeShader(3);
 				break;
 			default:
-				if (pointLights[i]->active == 1) {
-					shaders[0]->use();
-					shaders[0]->setVec3("objMaterial.AmbientColor", geo->material.ambient);
-					shaders[0]->setVec3("objMaterial.DifusseColor", geo->material.diffuse);
-					shaders[0]->setVec3("objMaterial.SpecularColor", geo->material.specular);
-					glm::mat4 MVP = Projection * View* Model;
-					shaders[0]->setMat4("mvpMatrix", MVP);
-					glBindVertexArray(geo->getVAO());
-					glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
-					glBindVertexArray(0);
-				}
 				break;
 			}
 			// Binds the vertex array to be drawn
@@ -843,14 +788,12 @@ void render()
 
 			}
 			else {
-				if (materialType != -1) {
 
-					glBindVertexArray(geo->getVAO());
-					activeTexture();
-					// Renders the triangle gemotry
-					glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
-					glBindVertexArray(0);
-				}
+				glBindVertexArray(geo->getVAO());
+				activeTexture();
+				// Renders the triangle gemotry
+				glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
+				glBindVertexArray(0);
 			}
 		}
 	}
@@ -914,11 +857,11 @@ int main(int argc, char const *argv[])
 	}
 
 	// Deletes the vertex array from the GPU
-	max=VAOS.size();
+	max = VAOS.size();
 	for (n = 0; n < max; n++) {
 		glDeleteVertexArrays(1, &VAOS[n]);
 	}
-	max=VBOS.size();
+	max = VBOS.size();
 	for (n = 0; n < max; n++) {
 		glDeleteBuffers(1, &VBOS[n]);
 	}
@@ -928,7 +871,6 @@ int main(int argc, char const *argv[])
 	glfwTerminate();
 	delete shader;
 	delete Ambient;
-	delete spotLight;
 	delete geo;
 	delete mesh;
 	delete camera;
@@ -938,7 +880,6 @@ int main(int argc, char const *argv[])
 	VBOS.clear();
 	meshes.clear();
 	shaders.clear();
-	pointLights.clear();
 	VBOaux.clear();
 
 
