@@ -26,11 +26,6 @@ using namespace std;
 
 unsigned int windowWidth = 800;
 unsigned int windowHeight = 800;
-unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
-unsigned int depthMapFBO[4];
-unsigned int depthMap[4];
-unsigned int quadVAO;
-unsigned int quadVBO;
 
 float aspectRatio = float(windowWidth / windowHeight);
 const char *windowTitle = "CCG Tarea";
@@ -50,7 +45,6 @@ bool firstMouse = true;
 bool mouseOn = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-bool quad = false;
 
 
 GLFWwindow *window;
@@ -74,7 +68,6 @@ glm::mat4 lightView;
 glm::mat4 lightSpaceMatrix;
 float near_plane = 0.01f, far_plane = 25.f;
 glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-glm::mat4 lightMatrixAL, lightMatrixSP, lightMatrixPL[2];
 
 /**
  * Handles the window resize
@@ -427,7 +420,6 @@ void updateDataInterface() {
 
 void updateUserInterface()
 {
-	quad = userInterface->getQuadActive();
 	geo = NULL;
 	auxPicked = userInterface->getMeshPicked();
 	if (auxPicked != meshPicked) {
@@ -499,88 +491,6 @@ void updateUserInterface()
 
 }
 
-void createDepthQuad() {
-	float quadVertices[] = {
-		-1.0f,  1.0f, 0.0f, 
-		0.0f, 1.0f,
-		-1.0f, -1.0f, 0.0f, 
-		0.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f, 
-		 1.0f, 1.0f,
-		 1.0f, -1.0f, 0.0f, 
-		 1.0f, 0.0f,
-	};
-
-	glGenVertexArrays(1, &quadVAO);
-	glGenBuffers(1, &quadVBO);
-	glBindVertexArray(quadVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glBindVertexArray(0);
-}
-
-
-void createBufferShadowMapping() {
-
-	glGenFramebuffers(4, depthMapFBO);
-	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-	glGenTextures(4, depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap[0]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[0]);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[0], 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_2D, depthMap[1]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[1]);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[1], 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_2D, depthMap[2]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[2]);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[2], 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_2D, depthMap[3]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO[3]);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap[3], 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
 
 Mesh* meshClone(Mesh* meshAux,glm::vec3 position,glm::vec3 scale,glm::vec3 rotation){
 	int lengthGeo=meshAux->getGeometryLength();
@@ -920,8 +830,6 @@ bool init()
 	rotations.clear();
 	scales.clear();
 	updateDataInterface();
-	createBufferShadowMapping();
-	createDepthQuad();
 
 	return true;
 }
@@ -1015,10 +923,6 @@ void activeShader(int shaderSelect) {
 	shaders[shaderSelect]->setMat4("modelViewMatrix", ModelView);
 	shaders[shaderSelect]->setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(Model))));
 	shaders[shaderSelect]->setMat4("mvpMatrix", MVP);
-	shaders[shaderSelect]->setMat4("lightSpaceMatrixAL", lightMatrixAL);
-	shaders[shaderSelect]->setMat4("lightSpaceMatrixSP", lightMatrixSP);
-	shaders[shaderSelect]->setMat4("lightSpaceMatrixPL[0]", lightMatrixPL[0]);
-	shaders[shaderSelect]->setMat4("lightSpaceMatrixPL[1]", lightMatrixPL[1]);
 
 
 }
@@ -1040,20 +944,6 @@ void activeTexture() {
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));//disable specular and diffuse texture
 
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKDepth()));//depth texture
-
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, depthMap[0]);//depth map
-
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, depthMap[1]);//depth map
-
-	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, depthMap[2]);//depth map
-
-	glActiveTexture(GL_TEXTURE9);
-	glBindTexture(GL_TEXTURE_2D, depthMap[3]);//depth map
 }
 
 void render()
@@ -1135,69 +1025,7 @@ void render()
 
 }
 
-glm::mat4 renderDepth(glm::vec3 pos, unsigned int depthMapFBOAc) {
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	lightView = glm::lookAt(pos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-	lightSpaceMatrix = lightProjection * lightView;
-	shaders[5]->use();
-	shaders[5]->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBOAc);
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	for (i = 3; i < max; i++) {
-		cont = meshes[i]->getGeometryLength();
-		materialType = meshes[i]->getMaterialType();
-		mesh = meshes[i];
-		for (n = 0; n < cont; n++) {
-			geo = mesh->getGeometry(n);
-			Model = mesh->getMeshMatrix()* geo->getGeometryMatrix();
-
-			// Binds the vertex array to be drawn
-			shaders[5]->setInt("kd", (mesh->getKD() == 1) ? 1 : 4);
-
-			shaders[5]->setMat4("modelMatrix", Model);
-
-			glBindVertexArray(geo->getVAO());
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(geo->getTextureKD()));
-					   
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, textureIDS->getTextureID(1));//disable specular and diffuse texture
-
-			// Renders the triangle gemotry
-			glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
-			glBindVertexArray(0);
-
-
-		}
-	}
-
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// reset viewport
-	glViewport(0, 0, windowWidth, windowHeight);
-
-	return lightSpaceMatrix;
-
-}
-
-void renderQuad(unsigned int depthMapAc) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	shaders[6]->use();
-	shaders[6]->setFloat("near_plane", near_plane);
-	shaders[6]->setFloat("far_plane", far_plane);
-	shaders[6]->setInt("depthMap", 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, depthMapAc);
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-}
 /**
  * App main loop
  * */
@@ -1214,17 +1042,7 @@ void update()
 		processKeyboardInput(window);
 		updateUserInterface();
 
-		lightMatrixAL = renderDepth(Ambient->direction*-2.f,depthMapFBO[0]);
-		lightMatrixSP = renderDepth(camera->Position+camera->Front, depthMapFBO[1]);
-		lightMatrixPL[0] = renderDepth(pointLights[0]->position, depthMapFBO[2]);
-		lightMatrixPL[1] = renderDepth(pointLights[1]->position, depthMapFBO[3]);
-
-		if (!quad) {
-			render();
-		}
-		else {
-			renderQuad(depthMap[0]);
-		}
+		render();
 		// Renders everything
 		TwDraw();
 
@@ -1264,8 +1082,6 @@ int main(int argc, char const *argv[])
 		textureID = textureIDS->getTextureID(i);
 		glDeleteTextures(1, &textureID);
 	}
-	glDeleteTextures(4, depthMap);
-	glDeleteFramebuffers(4, depthMapFBO);
 
 	// Deletes the vertex array from the GPU
 	max=VAOS.size();
@@ -1277,8 +1093,6 @@ int main(int argc, char const *argv[])
 		glDeleteBuffers(1, &VBOS[n]);
 	}
 
-	glDeleteVertexArrays(1, &quadVAO);
-	glDeleteBuffers(1, &quadVBO);
 
 	// Stops the glfw program
 	glfwTerminate();
