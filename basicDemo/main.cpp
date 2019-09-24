@@ -131,10 +131,11 @@ void cursorPos(GLFWwindow* window, double x, double y)
 		float xoffset = x - lastX;
 		float yoffset = lastY - y;
 
-		lastX = x;
-		lastY = y;
 
 		camera->ProcessMouseMovement(xoffset, yoffset);
+		glfwSetCursorPos(window, windowWidth / 2.0, windowHeight / 2.0);
+		lastX = windowWidth / 2.0;
+		lastY = windowHeight / 2.0;
 	}
 	else {
 		lastX = windowWidth / 2.0;
@@ -147,11 +148,12 @@ void charInput(GLFWwindow* window, unsigned int scanChar)
 	if (isKeyPress(GLFW_KEY_Q)) {
 		glfwSetCursorPos(window, windowWidth / 2.0, windowHeight / 2.0);
 		mouseOn = !mouseOn;
-	}
-	if (isKeyPress(GLFW_KEY_Z)) {
-		glfwSetCursorPos(window, windowWidth / 2.0, windowHeight / 2.0);
-		lastX = windowWidth / 2.0;
-		lastY = windowHeight / 2.0;
+		if (mouseOn) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		}
+		else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 	}
 	if (TwEventCharGLFW(scanChar, GLFW_PRESS))
 		return;
