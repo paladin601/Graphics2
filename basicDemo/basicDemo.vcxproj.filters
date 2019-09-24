@@ -30,31 +30,7 @@
     <ClCompile Include="stb_image.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="ObjLoader.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectionalLight.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="LightPropierties.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Geometry.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="TextureLoader.cpp">
@@ -65,31 +41,10 @@
     <ClInclude Include="Shader.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="ObjLoader.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="DirectionalLight.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="LightPropierties.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometry.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="TextureLoader.h">
@@ -97,34 +52,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\basic.frag">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\basic.vert">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
     <None Include="assets\shaders\pointLightLamp.frag">
       <Filter>Archivos de recursos\Shaders</Filter>
     </None>
     <None Include="assets\shaders\pointLightLamp.vert">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\orenNayar.frag">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\cookTorrance.frag">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\skybox.frag">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\skybox.vert">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\reflect.frag">
-      <Filter>Archivos de recursos\Shaders</Filter>
-    </None>
-    <None Include="assets\shaders\refract.frag">
       <Filter>Archivos de recursos\Shaders</Filter>
     </None>
   </ItemGroup>
