@@ -14,7 +14,6 @@
 #include "TextureLoader.h"
 #include "Shader.h"
 #include "Camera.h"
-#include "UserInterface.h"
 #include "Texture.h"
 #include "SpotLight.h"
 #include "PointLight.h"
@@ -51,7 +50,6 @@ GLFWwindow *window;
 ObjLoader loaderGeometry;
 TextureLoader loaderTexture;
 vector<Mesh *> meshes;
-CUserInterface * userInterface;
 vector<Shader *> shaders;
 Shader *shader;
 Texture *textureIDS = new Texture();
@@ -80,25 +78,13 @@ bool meshPickedChange(int id) {
 	return id == meshPicked;
 }
 
-bool initUserInterface()
-{
-	if (!TwInit(TW_OPENGL_CORE, NULL))
-		return false;
-
-	userInterface = CUserInterface::Instance();
-	userInterface->reshape();
-
-	return true;
-}
-
 bool isKeyPress(int key) {
 	return (glfwGetKey(window, key) == GLFW_PRESS);
 }
 
 void mouseButton(GLFWwindow* window, int button, int action, int mods)
 {
-	if (TwEventMouseButtonGLFW(button, action))
-		return;
+
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -110,8 +96,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void cursorPos(GLFWwindow* window, double x, double y)
 {
-	if (TwEventMousePosGLFW(int(x), int(y)))
-		return;
 	if (mouseOn) {
 
 		if (firstMouse)
@@ -148,8 +132,6 @@ void charInput(GLFWwindow* window, unsigned int scanChar)
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 	}
-	if (TwEventCharGLFW(scanChar, GLFW_PRESS))
-		return;
 }
 
 void processKeyboardInput(GLFWwindow *window)
@@ -184,19 +166,14 @@ void processKeyboardInput(GLFWwindow *window)
 		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/cookTorrance.frag");
 		shaders.push_back(shader);
-		shader = new Shader("assets/shaders/depthShader.vert", "assets/shaders/depthShader.frag");
-		shaders.push_back(shader);
-		shader = new Shader("assets/shaders/depthQuadShader.vert", "assets/shaders/depthQuadShader.frag");
-		shaders.push_back(shader);
-
 	}
 
 }
 
 void keyInput(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (TwEventKeyGLFW(key, action))
-		return;
+
+
 }
 
 
@@ -204,7 +181,6 @@ void resize(GLFWwindow *window, int width, int height)
 {
 	windowWidth = width;
 	windowHeight = height;
-	userInterface->reshape();
 	// Sets the OpenGL viewport size and position
 	glViewport(0, 0, windowWidth, windowHeight);
 }
@@ -349,148 +325,6 @@ void buildGeometry()
 	}
 }
 
-void updateDataMesh() {
-
-	meshes[meshPicked]->setMaterialType(userInterface->getMeshMaterialPicked());
-	meshes[meshPicked]->setRotate(userInterface->getMeshRotate());
-	meshes[meshPicked]->setTranslate(userInterface->getMeshTranslate());
-	meshes[meshPicked]->setScale(userInterface->getMeshScale());
-	meshes[meshPicked]->setIORin(userInterface->getIORin());
-	meshes[meshPicked]->setIORout(userInterface->getIORout());
-	meshes[meshPicked]->setKS(userInterface->getMeshKS());
-	meshes[meshPicked]->setKD(userInterface->getMeshKD());
-	meshes[meshPicked]->setKN(userInterface->getMeshKN());
-	meshes[meshPicked]->setReflect(userInterface->getReflect());
-	meshes[meshPicked]->setRefract(userInterface->getRefract());
-	meshes[meshPicked]->setIReflect(userInterface->getIReflect());
-	meshes[meshPicked]->setFactorReflect(userInterface->getFactorReflect());
-	meshes[meshPicked]->setShininess(userInterface->getShininessGeometry());
-	meshes[meshPicked]->setRoughness(userInterface->getRoughnessGeometry());
-	meshes[meshPicked]->setKDepth(userInterface->getMeshKDepth());
-	meshes[meshPicked]->setHeightScale(userInterface->getHeightScale());
-	meshes[meshPicked]->setMinLayer(userInterface->getMinLayer());
-	meshes[meshPicked]->setMaxLayer(userInterface->getMaxLayer());
-
-	geo = meshes[meshPicked]->getGeometry(geometryPicked);
-	geo->setTranslate(userInterface->getGeometryTranslate());
-	geo->setRotate(userInterface->getGeometryRotate());
-	geo->setScale(userInterface->getGeometryScale());
-	geo->material.ambient = userInterface->getColorAmbientGeometry();
-	geo->material.specular = userInterface->getColorSpecularGeometry();
-	geo->material.diffuse = userInterface->getColorDiffuseGeometry();
-}
-
-void updateGeometrydata() {
-	geo = meshes[meshPicked]->getGeometry(geometryPicked);
-	userInterface->setGeometryName(geo->getName());
-	userInterface->setGeometryTranslate(geo->getTranslate());
-	userInterface->setGeometryScale(geo->getScale());
-	userInterface->setGeometryRotate(geo->getRotate());
-	userInterface->setColorAmbientGeometry(geo->material.ambient);
-	userInterface->setColorDiffuseGeometry(geo->material.diffuse);
-	userInterface->setColorSpecularGeometry(geo->material.specular);
-}
-
-void updateDataInterface() {
-	userInterface->setGeometryPicked(0);
-	userInterface->setGeometryLength(meshes[meshPicked]->getGeometryLength());
-	userInterface->setMeshMaterialPicked(meshes[meshPicked]->getMaterialType());
-	userInterface->setMeshTranslate(meshes[meshPicked]->getTranslate());
-	userInterface->setMeshScale(meshes[meshPicked]->getScale());
-	userInterface->setMeshRotate(meshes[meshPicked]->getRotate());
-	userInterface->setIORin(meshes[meshPicked]->getIORin());
-	userInterface->setIORout(meshes[meshPicked]->getIORout());
-
-	userInterface->setMeshKD(meshes[meshPicked]->getKD());
-	userInterface->setMeshKS(meshes[meshPicked]->getKS());
-	userInterface->setMeshKN(meshes[meshPicked]->getKN());
-	userInterface->setReflect(meshes[meshPicked]->getReflect());
-	userInterface->setRefract(meshes[meshPicked]->getRefract());
-	userInterface->setIReflect(meshes[meshPicked]->getIReflect());
-	userInterface->setFactorReflect(meshes[meshPicked]->getFactorReflect());
-	userInterface->setShininessGeometry(meshes[meshPicked]->getShininess());
-	userInterface->setRoughnessGeometry(meshes[meshPicked]->getRoughness());
-	userInterface->setMeshKDepth(meshes[meshPicked]->getKDepth());
-	userInterface->setHeightScale(meshes[meshPicked]->getHeightScale());
-	userInterface->setMinLayer(meshes[meshPicked]->getMinLayer());
-	userInterface->setMaxLayer(meshes[meshPicked]->getMaxLayer());
-
-	updateGeometrydata();
-}
-
-void updateUserInterface()
-{
-	geo = NULL;
-	auxPicked = userInterface->getMeshPicked();
-	if (auxPicked != meshPicked) {
-		updateDataMesh();
-		geo = NULL;
-
-		meshPicked = auxPicked;
-		geometryPicked = 0;
-		updateDataInterface();
-
-	}
-	else {
-		auxPicked = userInterface->getGeometryPicked();
-		if (auxPicked != geometryPicked) {
-			geometryPicked = auxPicked;
-			updateGeometrydata();
-		}
-		else {
-			updateDataMesh();
-		}
-
-	}
-	Ambient->direction = userInterface->getDLLightAmbient();
-	Ambient->ambient = userInterface->getColorAmbientDL();
-	Ambient->diffuse = userInterface->getColorDiffuseDL();
-	Ambient->specular = userInterface->getColorSpecularDL();
-	Ambient->active = userInterface->getDLActive();
-
-	spotLight->active = userInterface->getSLActive();
-	spotLight->ambient = userInterface->getColorAmbientSL();
-	spotLight->diffuse = userInterface->getColorDiffuseSL();
-	spotLight->specular = userInterface->getColorSpecularSL();
-	spotLight->cutOff = userInterface->getCutOffSL();
-	spotLight->outerCutOff = userInterface->getOuterCutOffSL();
-	spotLight->constant = userInterface->getConstantSL();
-	spotLight->linear = userInterface->getLinearSL();
-	spotLight->quadratic = userInterface->getQuadraticSL();
-
-	pointLights[0]->active = userInterface->getPL1Active();
-	pointLights[0]->ambient = userInterface->getColorAmbientPL1();
-	pointLights[0]->diffuse = userInterface->getColorDiffusePL1();
-	pointLights[0]->specular = userInterface->getColorSpecularPL1();
-	pointLights[0]->position = userInterface->getPositionPL1();
-	pointLights[0]->constant = userInterface->getConstantPL1();
-	pointLights[0]->linear = userInterface->getLinearPL1();
-	pointLights[0]->quadratic = userInterface->getQuadraticPL1();
-
-
-	meshes[0]->getGeometry(0)->material.ambient = userInterface->getColorAmbientPL1();
-	meshes[0]->getGeometry(0)->material.diffuse = userInterface->getColorDiffusePL1();
-	meshes[0]->getGeometry(0)->material.specular = userInterface->getColorSpecularPL1();
-	meshes[0]->setTranslate(userInterface->getPositionPL1());
-
-
-
-	pointLights[1]->active = userInterface->getPL2Active();
-	pointLights[1]->ambient = userInterface->getColorAmbientPL2();
-	pointLights[1]->diffuse = userInterface->getColorDiffusePL2();
-	pointLights[1]->specular = userInterface->getColorSpecularPL2();
-	pointLights[1]->position = userInterface->getPositionPL2();
-	pointLights[1]->constant = userInterface->getConstantPL2();
-	pointLights[1]->linear = userInterface->getLinearPL2();
-	pointLights[1]->quadratic = userInterface->getQuadraticPL2();
-
-	meshes[1]->getGeometry(0)->material.ambient = userInterface->getColorAmbientPL2();
-	meshes[1]->getGeometry(0)->material.diffuse = userInterface->getColorDiffusePL2();
-	meshes[1]->getGeometry(0)->material.specular = userInterface->getColorSpecularPL2();
-	meshes[1]->setTranslate(userInterface->getPositionPL2());
-
-}
-
 
 Mesh* meshClone(Mesh* meshAux,glm::vec3 position,glm::vec3 scale,glm::vec3 rotation){
 	int lengthGeo=meshAux->getGeometryLength();
@@ -536,7 +370,7 @@ void pushBuffers(Mesh* meshAux){
 bool init()
 {
 	// Initialize the window, and the glad components
-	if (!initWindow() || !initGlad() || !initUserInterface())
+	if (!initWindow() || !initGlad() )
 		return false;
 
 	// Initialize the opengl context
@@ -829,7 +663,6 @@ bool init()
 	positions.clear();
 	rotations.clear();
 	scales.clear();
-	updateDataInterface();
 
 	return true;
 }
@@ -1040,11 +873,9 @@ void update()
 		lastFrame = currentFrame;
 		// Checks for keyboard inputs
 		processKeyboardInput(window);
-		updateUserInterface();
 
 		render();
 		// Renders everything
-		TwDraw();
 
 		glfwSwapBuffers(window);
 
@@ -1077,7 +908,6 @@ int main(int argc, char const *argv[])
 	// Starts the app main loop
 	update();
 	// Deletes the texture from the gpu
-	TwTerminate();
 	for (i = 0; i < textureIDS->getNumberTexture(); i++) {
 		textureID = textureIDS->getTextureID(i);
 		glDeleteTextures(1, &textureID);
@@ -1096,7 +926,6 @@ int main(int argc, char const *argv[])
 
 	// Stops the glfw program
 	glfwTerminate();
-	delete userInterface;
 	delete shader;
 	delete Ambient;
 	delete spotLight;

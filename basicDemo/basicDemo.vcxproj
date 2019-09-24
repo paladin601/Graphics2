@@ -144,7 +144,6 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -160,16 +159,11 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="Transform.h" />
-    <ClInclude Include="UserInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\basic.frag" />
     <None Include="assets\shaders\basic.vert" />
     <None Include="assets\shaders\cookTorrance.frag" />
-    <None Include="assets\shaders\depthQuadShader.frag" />
-    <None Include="assets\shaders\depthQuadShader.vert" />
-    <None Include="assets\shaders\depthShader.frag" />
-    <None Include="assets\shaders\depthShader.vert" />
     <None Include="assets\shaders\orenNayar.frag" />
     <None Include="assets\shaders\pointLightLamp.frag" />
     <None Include="assets\shaders\pointLightLamp.vert" />
