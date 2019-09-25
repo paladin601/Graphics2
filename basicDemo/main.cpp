@@ -1,4 +1,5 @@
-﻿#include <glad/glad.h> // Glad has to be include before glfw
+﻿#define _CRT_SECURE_NO_DEPRECATE
+#include <glad/glad.h> // Glad has to be include before glfw
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -28,7 +29,7 @@ glm::mat4 View;
 glm::mat4 Projection;
 
 //Camera
-Camera* camera = new Camera(glm::vec3(0,0,0));
+Camera* camera = new Camera(glm::vec3(0, 0, 5));
 
 float lastX = windowWidth / 2.0f;
 float lastY = windowHeight / 2.0f;
@@ -37,11 +38,13 @@ bool mouseOn = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float currentFrame;
+float step = 1.f / 256.f;
 
-const char* path = ".\assets\models\bonsai_256x256x256_uint8.raw";
+const char* path = "assets/models/bonsai_256x256x256_uint8.raw";
 
 unsigned int VAO = 0;
 unsigned int VBO;
+unsigned int textureID;
 
 /* *
  * Handles the window resize
@@ -207,11 +210,38 @@ void initGL()
  * */
 
 
+bool LoadVolumeData(const char* fileName) {
+	int XDIM = 256, YDIM = 256, ZDIM = 256;
+	const int size = XDIM * YDIM*ZDIM;
+	FILE* pFile = fopen(fileName, "rb");
+	if (NULL == pFile) {
+		return false;
+	}
+	GLubyte* pVolume = new GLubyte[size];
+	fread(pVolume, sizeof(GLubyte), size, pFile);
+	fclose(pFile);
+
+	//load data into a 3D texture
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_3D, textureID);
+
+	// set the texture parameters
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, XDIM, YDIM, ZDIM, 0, GL_RED, GL_UNSIGNED_BYTE, pVolume);
+	delete[] pVolume;
+	return true;
+}
+
 void buildGeometry()
 {
 	float vertices[] = {
 		// positions        // texture Coords
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+					-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -271,7 +301,7 @@ void buildGeometry()
 bool init()
 {
 	// Initialize the window, the interface and the glad components
-	if (!initWindow() || !initGlad() )
+	if (!initWindow() || !initGlad())
 		return false;
 
 	// Initialize the opengl context
@@ -283,7 +313,9 @@ bool init()
 
 	// Loads all the geometry into the GPU
 	buildGeometry();
-	
+
+	LoadVolumeData(path);
+
 	//Init values of tweakbar
 	initUserInterfaceValues();
 
@@ -310,6 +342,11 @@ void processKeyboardInput(GLFWwindow* window)
 		camera->ProcessKeyboard(LEFT, deltaTime);
 	if (isKeyPress(GLFW_KEY_D))
 		camera->ProcessKeyboard(RIGHT, deltaTime);
+	if (isKeyPress(GLFW_KEY_T) && step < 1.0f)
+		step += 1.f / 256.f;
+	if (isKeyPress(GLFW_KEY_G) && step > 0.0f)
+		step -= 1.f / 256.f;
+
 
 	// Checks if the r key is pressed
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
@@ -342,9 +379,13 @@ void render()
 	View = camera->GetViewMatrix();
 
 	shader->use();
+	glEnable(GL_TEXTURE_3D);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_3D, textureID);
 	shader->setMat4("Model", Model);
 	shader->setMat4("View", View);
 	shader->setMat4("Projection", Projection);
+	shader->setFloat("step", step);
 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -410,7 +451,7 @@ int main(int argc, char const* argv[])
 	// Starts the app main loop
 	update();
 
-
+	glDeleteTextures(1, &textureID);
 	//clear memory
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
