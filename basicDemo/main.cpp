@@ -1,4 +1,4 @@
-#include <glad/glad.h> // Glad has to be include before glfw
+﻿#include <glad/glad.h> // Glad has to be include before glfw
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -8,24 +8,27 @@
 #include <glm\gtx\euler_angles.hpp>
 #include <glm\gtx\matrix_cross_product.hpp>
 #include <iostream>
-
-
-#include "TextureLoader.h"
 #include "Shader.h"
 #include "Camera.h"
 
-using namespace std;
 
 unsigned int windowWidth = 800;
 unsigned int windowHeight = 800;
-
+// Window title
+const char* windowTitle = "Tarea CCG 3";
 float aspectRatio = float(windowWidth / windowHeight);
-const char *windowTitle = "CCG Tarea";
+// Window pointer
+GLFWwindow* window;
+// Shader object
+Shader* shader;
 
-unsigned int VBO;
-unsigned int VAO;
-unsigned int textureID;
-int max;
+//MVP Matrix
+glm::mat4 Model;
+glm::mat4 View;
+glm::mat4 Projection;
+
+//Camera
+Camera* camera = new Camera(glm::vec3(0,0,0));
 
 float lastX = windowWidth / 2.0f;
 float lastY = windowHeight / 2.0f;
@@ -33,36 +36,32 @@ bool firstMouse = true;
 bool mouseOn = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+float currentFrame;
 
+const char* path = ".\assets\models\bonsai_256x256x256_uint8.raw";
 
-GLFWwindow *window;
-TextureLoader loaderTexture;
-Shader *shader;
+unsigned int VAO = 0;
+unsigned int VBO;
 
-
-Camera *camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-glm::mat4 MVP, Projection, View, Model;
-
-
-/**
+/* *
  * Handles the window resize
  * @param{GLFWwindow} window pointer
  * @param{int} new width of the window
  * @param{int} new height of the window
  * */
+void resize(GLFWwindow* window, int width, int height)
+{
+	windowWidth = width;
+	windowHeight = height;
+	// Sets the OpenGL viewport size and position
+	glViewport(0, 0, windowWidth, windowHeight);
 
+}
 
 bool isKeyPress(int key) {
 	return (glfwGetKey(window, key) == GLFW_PRESS);
 }
 
-void mouseButton(GLFWwindow* window, int button, int action, int mods)
-{
-
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera->ProcessMouseScroll(yoffset);
@@ -94,6 +93,9 @@ void cursorPos(GLFWwindow* window, double x, double y)
 	}
 }
 
+/**
+ * Calback key press
+ * */
 void charInput(GLFWwindow* window, unsigned int scanChar)
 {
 	if (isKeyPress(GLFW_KEY_Q)) {
@@ -108,53 +110,25 @@ void charInput(GLFWwindow* window, unsigned int scanChar)
 	}
 }
 
-void processKeyboardInput(GLFWwindow *window)
-{
-	if (isKeyPress(GLFW_KEY_ESCAPE)) {
-		glfwSetWindowShouldClose(window, true);
-		return;
-	}
-	if (isKeyPress(GLFW_KEY_W))
-		camera->ProcessKeyboard(FORWARD, deltaTime);
-	if (isKeyPress(GLFW_KEY_S))
-		camera->ProcessKeyboard(BACKWARD, deltaTime);
-	if (isKeyPress(GLFW_KEY_A))
-		camera->ProcessKeyboard(LEFT, deltaTime);
-	if (isKeyPress(GLFW_KEY_D))
-		camera->ProcessKeyboard(RIGHT, deltaTime);
 
-	// Checks if the r key is pressed
-	if (isKeyPress(GLFW_KEY_R))
-	{
-		// Reloads the shader
-		delete shader;
-
-		shader = new Shader("assets/shaders/pointLightLamp.vert", "assets/shaders/pointLightLamp.frag");
-
-	}
-
-}
-
-void keyInput(GLFWwindow *window, int key, int scancode, int action, int mods)
+void initUserInterfaceValues()
 {
 
 
+
 }
-
-
-void resize(GLFWwindow *window, int width, int height)
+/**
+ * initialize the user interface
+ * @returns{bool} true if everything goes ok
+* */
+bool initUserInterface()
 {
-	windowWidth = width;
-	windowHeight = height;
-	// Sets the OpenGL viewport size and position
-	glViewport(0, 0, windowWidth, windowHeight);
+	return true;
 }
-
 /**
  * Initialize the glfw library
  * @returns{bool} true if everything goes ok
  * */
-
 bool initWindow()
 {
 	// Initialize glfw
@@ -163,6 +137,7 @@ bool initWindow()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 	// Creates the window
 	window = glfwCreateWindow(windowWidth, windowHeight, windowTitle, NULL, NULL);
@@ -175,25 +150,22 @@ bool initWindow()
 		return false;
 	}
 
-
 	// Creates the glfwContext, this has to be made before calling initGlad()
 	glfwMakeContextCurrent(window);
 
 	// Window resize callback
-	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetFramebufferSizeCallback(window, resize);
-	glfwSetKeyCallback(window, keyInput);
-	glfwSetMouseButtonCallback(window, mouseButton);
+	glfwSetScrollCallback(window, scroll_callback);
 	glfwSetCursorPosCallback(window, cursorPos);
 	glfwSetCharCallback(window, charInput);
+
 	return true;
 }
 
-/**z
+/**
  * Initialize the glad library
  * @returns{bool} true if everything goes ok
  * */
-
 bool initGlad()
 {
 	// Initialize glad
@@ -207,27 +179,38 @@ bool initGlad()
 	}
 	return true;
 }
-
 /**
  * Initialize the opengl context
  * */
-
 void initGL()
 {
 	// Enables the z-buffer test
 	glEnable(GL_DEPTH_TEST);
-
-
+	glEnable(GL_FRAMEBUFFER_SRGB);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Sets the ViewPort
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Sets the clear color
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 }
 
+/*
+** Init MVP Matrix
+*/
+
+
+/**
+ * Loads a texture into the GPU
+ * @param{const char} path of the texture file
+ * @returns{unsigned int} GPU texture index
+ * */
+
+
 void buildGeometry()
 {
-
 	float vertices[] = {
+		// positions        // texture Coords
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -270,116 +253,132 @@ void buildGeometry()
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-
 	glBindVertexArray(VAO);
-
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	// texture coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
-	
-
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 }
 
-
+/**
+ * Initialize everything
+ * @returns{bool} true if everything goes ok
+ * */
 bool init()
 {
-	// Initialize the window, and the glad components
-	if (!initWindow() || !initGlad())
+	// Initialize the window, the interface and the glad components
+	if (!initWindow() || !initGlad() )
 		return false;
 
 	// Initialize the opengl context
 	initGL();
-	buildGeometry();
-	
 
 	// Loads the shader
-	shader = new Shader("assets/shaders/pointLightLamp.vert", "assets/shaders/pointLightLamp.frag");
+	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+
+
+	// Loads all the geometry into the GPU
+	buildGeometry();
 	
+	//Init values of tweakbar
+	initUserInterfaceValues();
 
 	return true;
 }
+/**
+ * Process the keyboard input
+ * There are ways of implementing this function through callbacks provide by
+ * the GLFW API, check the GLFW documentation to find more
+ * @param{GLFWwindow} window pointer
+ * */
+void processKeyboardInput(GLFWwindow* window)
+{
+	// Checks if the escape key is pressed
+	if (isKeyPress(GLFW_KEY_ESCAPE)) {
+		glfwSetWindowShouldClose(window, true);
+		return;
+	}
+	if (isKeyPress(GLFW_KEY_W))
+		camera->ProcessKeyboard(FORWARD, deltaTime);
+	if (isKeyPress(GLFW_KEY_S))
+		camera->ProcessKeyboard(BACKWARD, deltaTime);
+	if (isKeyPress(GLFW_KEY_A))
+		camera->ProcessKeyboard(LEFT, deltaTime);
+	if (isKeyPress(GLFW_KEY_D))
+		camera->ProcessKeyboard(RIGHT, deltaTime);
+
+	// Checks if the r key is pressed
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		// Reloads the shader
+		delete shader;
+
+		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+
+	}
+}
+
+void updateUserInterface()
+{
+	//Model
+}
 
 
+
+/**
+ * Render Function
+ * */
 void render()
 {
 	// Clears the color and depth buffers from the frame buffer
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/** Draws code goes here **/
-	// Use the shader
-
-	// craer la matriz de vista
+	Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f));
 	Projection = glm::perspective(glm::radians(camera->Zoom), aspectRatio, 0.1f, 100.0f);
 	View = camera->GetViewMatrix();
 
-	/*paint volumen*/
 	shader->use();
-	shader->setMat4("projectionMatrix", Projection);
-	shader->setMat4("viewMatrix", View);
-
-
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-
-
+	shader->setMat4("Model", Model);
+	shader->setMat4("View", View);
+	shader->setMat4("Projection", Projection);
 
 	glBindVertexArray(VAO);
-	// Renders the triangle gemotry
-	for (unsigned int i = 0; i < 10; i++)
-	{
-		// calculate the model matrix for each object and pass it to shader before drawing
-		glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		model = glm::translate(model, cubePositions[i]);
-		float angle = 20.0f * i;
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-		shader->setMat4("modelMatrix", model);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 
 
 }
-
+/*
+* change speed
+*/
 
 /**
  * App main loop
  * */
-
 void update()
 {
 	// Loop until something tells the window, that it has to be closed
 	while (!glfwWindowShouldClose(window))
 	{
-		float currentFrame = glfwGetTime();
+		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+
 		// Checks for keyboard inputs
 		processKeyboardInput(window);
 
-		render();
 		// Renders everything
+		render();
 
+		//Update
+		//updateUserInterface();
+
+		// Swap the buffer
 		glfwSwapBuffers(window);
 
 		// Check and call events
@@ -387,14 +386,14 @@ void update()
 	}
 }
 
+
 /**
  * App starting point
  * @param{int} number of arguments
  * @param{char const *[]} running arguments
  * @returns{int} app exit code
  * */
-
-int main(int argc, char const *argv[])
+int main(int argc, char const* argv[])
 {
 	// Initialize all the app components
 	if (!init())
@@ -410,23 +409,14 @@ int main(int argc, char const *argv[])
 
 	// Starts the app main loop
 	update();
-	// Deletes the texture from the gpu
-	glDeleteTextures(1, &textureID);
 
-	// Deletes the vertex array from the GPU
 
+	//clear memory
 	glDeleteVertexArrays(1, &VAO);
-	
 	glDeleteBuffers(1, &VBO);
-
-
-	// Stops the glfw program
-	glfwTerminate();
 	delete shader;
 	delete camera;
-
-
-
+	glfwTerminate();
 
 	return 0;
 }

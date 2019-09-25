@@ -9,6 +9,7 @@ enum shaderType {
 	GEOMETRY_SHADER,
 	PROGRAM
 };
+
 class Shader
 {
 public:
@@ -37,15 +38,11 @@ public:
 	*/
 	void use();
 	
-
-	
-
 	/**
 	* Sets a bool uniform
 	* @param{std::string &} uniform name
 	* @param{bool} value to be set
 	*/
-	
 	void setBool(const std::string &name, bool value) const;
 
 	/**

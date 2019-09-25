@@ -1,4 +1,3 @@
-#pragma once
 #include "Shader.h"
 #include <glad/glad.h>
 #include <fstream>
@@ -61,8 +60,6 @@ void Shader::use()
 	glUseProgram(ID);
 }
 
-
-
 void Shader::setBool(const std::string &name, bool value) const
 {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
@@ -86,7 +83,6 @@ void Shader::setVec2(const std::string &name, const glm::vec2 &value) const
 void Shader::setVec2(const std::string &name, float x, float y) const
 {
 	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
-	
 }
 
 void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
