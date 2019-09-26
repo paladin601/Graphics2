@@ -205,6 +205,10 @@ void cursorPos(GLFWwindow* window, double x, double y)
 
 void charInput(GLFWwindow* window, unsigned int scanChar)
 {
+	if (isKeyPress(GLFW_KEY_T) && select < 2)
+		select += 1;
+	if (isKeyPress(GLFW_KEY_G) && select > 0)
+		select -= 1;
 	if (isKeyPress(GLFW_KEY_Q)) {
 		glfwSetCursorPos(window, windowWidth / 2.0, windowHeight / 2.0);
 		mouseOn = !mouseOn;
@@ -234,10 +238,9 @@ void processKeyboardInput(GLFWwindow *window)
 		camera->ProcessKeyboard(LEFT, deltaTime);
 	if (isKeyPress(GLFW_KEY_D))
 		camera->ProcessKeyboard(RIGHT, deltaTime);
-	if (isKeyPress(GLFW_KEY_T)&&select<3)
-		select+=1;
-	if (isKeyPress(GLFW_KEY_G) && select >0)
-		select -= 1;
+
+
+	std::cout << select << endl;
 
 	// Checks if the r key is pressed
 	if (isKeyPress(GLFW_KEY_R))
@@ -621,6 +624,7 @@ bool init()
 	pointLights.push_back(aux1);
 	aux1 = new PointLight();
 	pointLights.push_back(aux1);
+	configBuffers();
 	createQuad();
 
 	// Loads the shader
