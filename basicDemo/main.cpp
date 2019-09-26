@@ -1126,8 +1126,8 @@ void renderDFS() {
 			geo = mesh->getGeometry(n);
 			Model = mesh->getMeshMatrix()* geo->getGeometryMatrix();
 			shaderDFS->setMat4("Model", Model);
-			shaderDFS->setInt("texture_diffuse1", 1);
-			shaderDFS->setInt("texture_specular1", 2);
+			shaderDFS->setInt("texture_diffuse1", (mesh->getKD() == 1) ? 1 : 4);
+			shaderDFS->setInt("texture_specular1", (mesh->getKS() == 1) ? 2 : 4);
 		
 
 			glBindVertexArray(geo->getVAO());
@@ -1148,15 +1148,17 @@ void renderQuad()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	shaderQuad->use();
-	shaderDFS->setInt("text", select);
-	shaderDFS->setMat4("proj", Projection);
-	shaderDFS->setMat4("view", View);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gPosition);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	shaderQuad->setInt("gPosition", 0);
+	shaderQuad->setInt("gNormal", 1);
+	shaderQuad->setInt("gAlbedoSpec", 2);
+	shaderQuad->setMat4("proj", Projection);
+	shaderQuad->setMat4("view", View);
 	//unsigned int gPosition, gNormal, gAlbedoSpec;
 
 	glBindVertexArray(quadVAO);
