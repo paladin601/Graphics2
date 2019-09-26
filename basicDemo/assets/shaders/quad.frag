@@ -11,5 +11,5 @@ out vec4 color;
 
 void main()
 {
-    color = vec4(texture(gNormal, texCoords).rgb,1.0f);
+    color = vec4(texture(gAlbedoSpec, texCoords));
 }
