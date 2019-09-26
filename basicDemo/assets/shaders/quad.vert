@@ -1,0 +1,16 @@
+#version 330 core
+// Atributte 0 of the vertex
+layout (location = 0) in vec3 vertexPosition;
+// Atribute 2 of the vertex
+layout (location = 2) in vec2 uvCoords;
+
+// Vertex data out data
+out vec2 texCoords;
+uniform mat4 view;
+uniform mat4 proj;
+
+void main()
+{
+	texCoords = uvCoords;
+    gl_Position = vec4(vertexPosition, 1.0f);
+}

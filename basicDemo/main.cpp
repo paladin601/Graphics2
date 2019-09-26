@@ -45,6 +45,11 @@ bool firstMouse = true;
 bool mouseOn = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+int select = 0;
+
+unsigned int gBuffer;
+unsigned int gPosition, gNormal, gAlbedoSpec;
+unsigned int rboDepth;
 
 
 GLFWwindow *window;
@@ -54,6 +59,8 @@ vector<Mesh *> meshes;
 CUserInterface * userInterface;
 vector<Shader *> shaders;
 Shader *shader;
+Shader *shaderDFS;
+Shader *shaderQuad;
 Texture *textureIDS = new Texture();
 DirectionalLight *Ambient;
 SpotLight *spotLight;
@@ -75,6 +82,29 @@ glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane,
  * @param{int} new width of the window
  * @param{int} new height of the window
  * */
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+
+void createQuad() {
+	float quadVertices[] = {
+		// positions        // texture Coords
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+	};
+	// setup plane VAO
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+}
 
 bool meshPickedChange(int id) {
 	return id == meshPicked;
@@ -106,6 +136,43 @@ void mouseButton(GLFWwindow* window, int button, int action, int mods)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera->ProcessMouseScroll(yoffset);
+}
+
+void configBuffers() {
+
+	glGenFramebuffers(1, &gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	// position color buffer
+	glGenTextures(1, &gPosition);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	// normal color buffer
+	glGenTextures(1, &gNormal);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+	// color + specular color buffer
+	glGenTextures(1, &gAlbedoSpec);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+	// depth buffer
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void cursorPos(GLFWwindow* window, double x, double y)
@@ -167,11 +234,17 @@ void processKeyboardInput(GLFWwindow *window)
 		camera->ProcessKeyboard(LEFT, deltaTime);
 	if (isKeyPress(GLFW_KEY_D))
 		camera->ProcessKeyboard(RIGHT, deltaTime);
+	if (isKeyPress(GLFW_KEY_T)&&select<3)
+		select+=1;
+	if (isKeyPress(GLFW_KEY_G) && select >0)
+		select -= 1;
 
 	// Checks if the r key is pressed
 	if (isKeyPress(GLFW_KEY_R))
 	{
 		// Reloads the shader
+		delete shaderDFS;
+		delete shaderQuad;
 		shaders.clear();
 
 		shader = new Shader("assets/shaders/pointLightLamp.vert", "assets/shaders/pointLightLamp.frag");
@@ -188,7 +261,8 @@ void processKeyboardInput(GLFWwindow *window)
 		shaders.push_back(shader);
 		shader = new Shader("assets/shaders/depthQuadShader.vert", "assets/shaders/depthQuadShader.frag");
 		shaders.push_back(shader);
-
+		shaderDFS= new Shader("assets/shaders/DFSbasic.vert", "assets/shaders/DFSbasic.frag");
+		shaderQuad= new Shader("assets/shaders/quad.vert", "assets/shaders/quad.frag");
 	}
 
 }
@@ -547,6 +621,7 @@ bool init()
 	pointLights.push_back(aux1);
 	aux1 = new PointLight();
 	pointLights.push_back(aux1);
+	createQuad();
 
 	// Loads the shader
 	shader = new Shader("assets/shaders/pointLightLamp.vert", "assets/shaders/pointLightLamp.frag");
@@ -563,6 +638,8 @@ bool init()
 	shaders.push_back(shader);
 	shader = new Shader("assets/shaders/depthQuadShader.vert", "assets/shaders/depthQuadShader.frag");
 	shaders.push_back(shader);
+	shaderDFS = new Shader("assets/shaders/DFSbasic.vert", "assets/shaders/DFSbasic.frag");
+	shaderQuad = new Shader("assets/shaders/quad.vert", "assets/shaders/quad.frag");
 
 
 	vector<string> faces
@@ -949,7 +1026,6 @@ void activeTexture() {
 void render()
 {
 	// Clears the color and depth buffers from the frame buffer
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	/** Draws code goes here **/
 	// Use the shader
@@ -1026,6 +1102,65 @@ void render()
 }
 
 
+void renderDFS() {
+	int kd, kdepth;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shaderDFS->use();
+	Projection = glm::perspective(glm::radians(camera->Zoom), aspectRatio, 0.1f, 100.0f);
+	View = camera->GetViewMatrix();
+	shaderDFS->setMat4("Projection", Projection);
+	shaderDFS->setMat4("View", View);
+	for (i = 2; i < max; i++) {
+		cont = meshes[i]->getGeometryLength();
+		materialType = meshes[i]->getMaterialType();
+		mesh = meshes[i];
+		kd = mesh->getKD();
+		for (n = 0; n < cont; n++) {
+			geo = mesh->getGeometry(n);
+			Model = mesh->getMeshMatrix()* geo->getGeometryMatrix();
+			shaderDFS->setMat4("Model", Model);
+			shaderDFS->setInt("texture_diffuse1", (mesh->getKD() == 1) ? 1 : 4);
+			shaderDFS->setInt("texture_specular1", (mesh->getKS() == 1) ? 2 : 4);
+		
+
+			glBindVertexArray(geo->getVAO());
+			activeTexture();
+			glDrawArrays(GL_TRIANGLES, 0, geo->getSizeVertex());
+			glBindVertexArray(0);
+				
+			
+		}
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+
+
+void renderQuad()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shaderQuad->use();
+	shaderDFS->setInt("text", select);
+	shaderDFS->setMat4("proj", Projection);
+	shaderDFS->setMat4("view", View);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, gPosition);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, gNormal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	//unsigned int gPosition, gNormal, gAlbedoSpec;
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
+
+
 /**
  * App main loop
  * */
@@ -1042,7 +1177,12 @@ void update()
 		processKeyboardInput(window);
 		updateUserInterface();
 
-		render();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		renderDFS();
+		
+		renderQuad();
+		
 		// Renders everything
 		TwDraw();
 
@@ -1092,6 +1232,14 @@ int main(int argc, char const *argv[])
 	for (n = 0; n < max; n++) {
 		glDeleteBuffers(1, &VBOS[n]);
 	}
+
+	glDeleteVertexArrays(1, &quadVAO);
+	glDeleteBuffers(1, &quadVBO);
+	glDeleteFramebuffers(1, &gBuffer);
+	glDeleteTextures(1, &gPosition);
+	glDeleteTextures(1, &gNormal);
+	glDeleteTextures(1, &gAlbedoSpec);
+	glDeleteRenderbuffers(1, &rboDepth);
 
 
 	// Stops the glfw program

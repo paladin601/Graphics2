@@ -170,9 +170,13 @@
     <None Include="assets\shaders\depthQuadShader.vert" />
     <None Include="assets\shaders\depthShader.frag" />
     <None Include="assets\shaders\depthShader.vert" />
+    <None Include="assets\shaders\DFSbasic.frag" />
+    <None Include="assets\shaders\DFSbasic.vert" />
     <None Include="assets\shaders\orenNayar.frag" />
     <None Include="assets\shaders\pointLightLamp.frag" />
     <None Include="assets\shaders\pointLightLamp.vert" />
+    <None Include="assets\shaders\quad.frag" />
+    <None Include="assets\shaders\quad.vert" />
     <None Include="assets\shaders\reflect.frag" />
     <None Include="assets\shaders\refract.frag" />
     <None Include="assets\shaders\skybox.frag" />

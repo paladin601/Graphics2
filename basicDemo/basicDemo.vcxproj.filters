@@ -157,5 +157,17 @@
     <None Include="assets\shaders\depthQuadShader.vert">
       <Filter>Archivos de recursos\Shaders</Filter>
     </None>
+    <None Include="assets\shaders\DFSbasic.frag">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\DFSbasic.vert">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\quad.frag">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\quad.vert">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
