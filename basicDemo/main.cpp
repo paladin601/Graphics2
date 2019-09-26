@@ -219,6 +219,8 @@ void charInput(GLFWwindow* window, unsigned int scanChar)
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 	}
+	std::cout << select << endl;
+
 	if (TwEventCharGLFW(scanChar, GLFW_PRESS))
 		return;
 }
@@ -240,7 +242,6 @@ void processKeyboardInput(GLFWwindow *window)
 		camera->ProcessKeyboard(RIGHT, deltaTime);
 
 
-	std::cout << select << endl;
 
 	// Checks if the r key is pressed
 	if (isKeyPress(GLFW_KEY_R))
@@ -1116,7 +1117,7 @@ void renderDFS() {
 	View = camera->GetViewMatrix();
 	shaderDFS->setMat4("Projection", Projection);
 	shaderDFS->setMat4("View", View);
-	for (i = 2; i < max; i++) {
+	for (i = 10; i < max; i++) {
 		cont = meshes[i]->getGeometryLength();
 		materialType = meshes[i]->getMaterialType();
 		mesh = meshes[i];
@@ -1125,8 +1126,8 @@ void renderDFS() {
 			geo = mesh->getGeometry(n);
 			Model = mesh->getMeshMatrix()* geo->getGeometryMatrix();
 			shaderDFS->setMat4("Model", Model);
-			shaderDFS->setInt("texture_diffuse1", (mesh->getKD() == 1) ? 1 : 4);
-			shaderDFS->setInt("texture_specular1", (mesh->getKS() == 1) ? 2 : 4);
+			shaderDFS->setInt("texture_diffuse1", 1);
+			shaderDFS->setInt("texture_specular1", 2);
 		
 
 			glBindVertexArray(geo->getVAO());
