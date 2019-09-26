@@ -6,8 +6,6 @@ layout (location = 1) in vec2 uvCoords;
 
 // Vertex data out data
 out vec2 texCoords;
-uniform mat4 view;
-uniform mat4 proj;
 
 void main()
 {

@@ -1154,11 +1154,14 @@ void renderQuad()
 	glBindTexture(GL_TEXTURE_2D, gNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+	shaderQuad->setVec3("ambientLight.AmbientColor", Ambient->ambient);
+	shaderQuad->setVec3("ambientLight.DifusseColor", Ambient->diffuse);
+	shaderQuad->setVec3("ambientLight.SpecularColor", Ambient->specular);
+	shaderQuad->setVec3("ambientLight.directionAL", Ambient->direction);
+	shaderQuad->setVec3("viewPos", camera->Position);
 	shaderQuad->setInt("gPosition", 0);
 	shaderQuad->setInt("gNormal", 1);
 	shaderQuad->setInt("gAlbedoSpec", 2);
-	shaderQuad->setMat4("proj", Projection);
-	shaderQuad->setMat4("view", View);
 	//unsigned int gPosition, gNormal, gAlbedoSpec;
 
 	glBindVertexArray(quadVAO);
