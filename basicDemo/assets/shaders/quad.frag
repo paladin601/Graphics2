@@ -9,5 +9,5 @@ out vec4 color;
 
 void main()
 {
-    color = texture(text,texCoords);
+    color = vec4(texture(text,texCoords).rgb,1.0f);
 }

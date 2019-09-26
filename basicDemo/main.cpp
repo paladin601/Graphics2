@@ -1117,7 +1117,7 @@ void renderDFS() {
 	View = camera->GetViewMatrix();
 	shaderDFS->setMat4("Projection", Projection);
 	shaderDFS->setMat4("View", View);
-	for (i = 10; i < max; i++) {
+	for (i = 4; i < max; i++) {
 		cont = meshes[i]->getGeometryLength();
 		materialType = meshes[i]->getMaterialType();
 		mesh = meshes[i];
