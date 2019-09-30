@@ -22,6 +22,7 @@ float aspectRatio = float(windowWidth / windowHeight);
 GLFWwindow* window;
 // Shader object
 Shader* shader;
+Shader* shaderRayCast;
 
 //MVP Matrix
 glm::mat4 Model;
@@ -45,6 +46,7 @@ const char* path = "assets/models/bonsai_256x256x256_uint8.raw";
 unsigned int VAO = 0;
 unsigned int VBO;
 unsigned int textureID;
+unsigned int framebuffer, textureRender, depthBuffer;
 
 /* *
  * Handles the window resize
@@ -189,7 +191,6 @@ void initGL()
 {
 	// Enables the z-buffer test
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Sets the ViewPort
@@ -237,51 +238,69 @@ bool LoadVolumeData(const char* fileName) {
 	return true;
 }
 
+unsigned int quadVAO, quadVBO;
 void buildGeometry()
 {
+	float quadVertices[] = {
+		// positions        // Color   		   // texture Coords
+		-1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f, 0.5f, 0.5f, 0.75f, 1.0f, 0.0f,
+	};
+	// Setup plane VAO
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	// Position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	// Color
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Texture Coords
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	
 	float vertices[] = {
-		// positions        // texture Coords
-					-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	-0.5f,-0.5f,-0.5f,
+	-0.5f,-0.5f, 0.5f,
+	-0.5f, 0.5f, 0.5f,
+	 0.5f, 0.5f,-0.5f,
+	-0.5f,-0.5f,-0.5f,
+	-0.5f, 0.5f,-0.5f,
+	 0.5f,-0.5f, 0.5f,
+	-0.5f,-0.5f,-0.5f,
+	 0.5f,-0.5f,-0.5f,
+	 0.5f, 0.5f,-0.5f,
+	 0.5f,-0.5f,-0.5f,
+	-0.5f,-0.5f,-0.5f,
+	-0.5f,-0.5f,-0.5f,
+	-0.5f, 0.5f, 0.5f,
+	-0.5f, 0.5f,-0.5f,
+	 0.5f,-0.5f, 0.5f,
+	-0.5f,-0.5f, 0.5f,
+	-0.5f,-0.5f,-0.5f,
+	-0.5f, 0.5f, 0.5f,
+	-0.5f,-0.5f, 0.5f,
+	 0.5f,-0.5f, 0.5f,
+	 0.5f, 0.5f, 0.5f,
+	 0.5f,-0.5f,-0.5f,
+	 0.5f, 0.5f,-0.5f,
+	 0.5f,-0.5f,-0.5f,
+	 0.5f, 0.5f, 0.5f,
+	 0.5f,-0.5f, 0.5f,
+	 0.5f, 0.5f, 0.5f,
+	 0.5f, 0.5f,-0.5f,
+	-0.5f, 0.5f,-0.5f,
+	 0.5f, 0.5f, 0.5f,
+	-0.5f, 0.5f,-0.5f,
+	-0.5f, 0.5f, 0.5f,
+	 0.5f, 0.5f, 0.5f,
+	-0.5f, 0.5f, 0.5f,
+	 0.5f,-0.5f, 0.5f
 	};
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -289,10 +308,33 @@ void buildGeometry()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
+
+
+bool createFrameBuffers() {
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	glGenTextures(1, &textureRender);
+	glBindTexture(GL_TEXTURE_2D, textureRender);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureRender, 0);
+
+	GLenum buffers[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, buffers);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "ERROR de capa 8::Revisa los framebuffers" << std::endl;
+		return false;
+	}
+	return true;
+}
+
 
 /**
  * Initialize everything
@@ -301,7 +343,7 @@ void buildGeometry()
 bool init()
 {
 	// Initialize the window, the interface and the glad components
-	if (!initWindow() || !initGlad())
+	if (!initWindow() || !initGlad()|| !createFrameBuffers())
 		return false;
 
 	// Initialize the opengl context
@@ -309,12 +351,12 @@ bool init()
 
 	// Loads the shader
 	shader = new Shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+	shaderRayCast = new Shader("assets/shaders/rayCast.vert", "assets/shaders/rayCast.frag");
 
-
+	LoadVolumeData(path);
 	// Loads all the geometry into the GPU
 	buildGeometry();
 
-	LoadVolumeData(path);
 
 	//Init values of tweakbar
 	initUserInterfaceValues();
@@ -353,8 +395,11 @@ void processKeyboardInput(GLFWwindow* window)
 	{
 		// Reloads the shader
 		delete shader;
+		delete shaderRayCast;
 
 		shader = new Shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+		shaderRayCast = new Shader("assets/shaders/rayCast.vert", "assets/shaders/rayCast.frag");
+
 
 	}
 }
@@ -365,32 +410,57 @@ void updateUserInterface()
 }
 
 
+void renderVolumeBackface() {
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+
+	View = camera->GetViewMatrix();
+	Projection = glm::perspective(glm::radians(camera->Zoom), aspectRatio, 0.1f, 100.0f);
+	Model = glm::mat4(1.0f);
+	
+	shader->use();
+	shader->setMat4("Model", Model);
+	shader->setMat4("View", View);
+	shader->setMat4("Projection", Projection);
+
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glCullFace(GL_BACK);
+}
+
 
 /**
  * Render Function
  * */
 void render()
-{
-	// Clears the color and depth buffers from the frame buffer
+{	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f));
 	Projection = glm::perspective(glm::radians(camera->Zoom), aspectRatio, 0.1f, 100.0f);
 	View = camera->GetViewMatrix();
+	Model = glm::mat4(1.0f);
 
-	shader->use();
-	glEnable(GL_TEXTURE_3D);
+	shaderRayCast->use();
+	shaderRayCast->setMat4("Model", Model);
+	shaderRayCast->setMat4("View", View);
+	shaderRayCast->setMat4("Projection", Projection);
+	//shaderRayCast->setFloat("step", step);
+	shaderRayCast->setInt("textureVolume", 0);
+	shaderRayCast->setInt("textureRender", 1);
+	shaderRayCast->setVec2("windowSize", glm::vec2(windowWidth, windowHeight));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_3D, textureID);
-	shader->setMat4("Model", Model);
-	shader->setMat4("View", View);
-	shader->setMat4("Projection", Projection);
-	shader->setFloat("step", step);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, textureRender);
 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-
 
 }
 /*
@@ -413,8 +483,13 @@ void update()
 		// Checks for keyboard inputs
 		processKeyboardInput(window);
 
+		//render cube backface in framebuffer
+		//save in texture coord
+		renderVolumeBackface();
+
 		// Renders everything
 		render();
+
 
 		//Update
 		//updateUserInterface();
@@ -424,7 +499,9 @@ void update()
 
 		// Check and call events
 		glfwPollEvents();
+
 	}
+
 }
 
 
@@ -455,7 +532,13 @@ int main(int argc, char const* argv[])
 	//clear memory
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &quadVAO);
+	glDeleteBuffers(1, &quadVBO);
+	glDeleteFramebuffers(1, &framebuffer);
+	glDeleteTextures(1, &textureRender);
+	glDeleteRenderbuffers(1, &depthBuffer);
 	delete shader;
+	delete shaderRayCast;
 	delete camera;
 	glfwTerminate();
 

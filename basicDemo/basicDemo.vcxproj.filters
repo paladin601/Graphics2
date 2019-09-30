@@ -49,5 +49,11 @@
     <None Include="assets\shaders\basic.vert">
       <Filter>Archivos de recursos\Shaders</Filter>
     </None>
+    <None Include="assets\shaders\rayCast.frag">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
+    <None Include="assets\shaders\rayCast.vert">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
