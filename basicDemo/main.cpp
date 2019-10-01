@@ -23,6 +23,7 @@ GLFWwindow* window;
 // Shader object
 Shader* shader;
 Shader* shaderRayCast;
+Shader* shaderTransferFunction;
 
 //MVP Matrix
 glm::mat4 Model;
@@ -59,6 +60,7 @@ void resize(GLFWwindow* window, int width, int height)
 	windowWidth = width;
 	windowHeight = height;
 	// Sets the OpenGL viewport size and position
+	aspectRatio = float(windowWidth / windowHeight);
 	glViewport(0, 0, windowWidth, windowHeight);
 
 }
@@ -196,7 +198,7 @@ void initGL()
 	// Sets the ViewPort
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Sets the clear color
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 }
 
 /*
@@ -410,6 +412,16 @@ void updateUserInterface()
 }
 
 
+
+void renderFunctionTransfer() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+
+
+}
+
 void renderVolumeBackface() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -483,16 +495,25 @@ void update()
 		// Checks for keyboard inputs
 		processKeyboardInput(window);
 
+
+		//Update
+		//updateUserInterface();
+
+		glViewport(0, 0, windowWidth, windowHeight*0.3);
+		renderFunctionTransfer();
+
+
 		//render cube backface in framebuffer
 		//save in texture coord
+		glViewport(0, windowHeight*0.3, windowWidth, windowHeight*0.7);
 		renderVolumeBackface();
 
 		// Renders everything
 		render();
 
+		glViewport(0, 0, windowWidth, windowHeight);
 
-		//Update
-		//updateUserInterface();
+
 
 		// Swap the buffer
 		glfwSwapBuffers(window);
